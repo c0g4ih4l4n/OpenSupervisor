@@ -1,7 +1,0 @@
-Thesis ideas
-
-1. Scan all subdomains, create monitoring service of all targets.
-2. Scan masscan all port, combine with nmap result then scan all services
-3. Create exploit database of app exploit available.
-	- find exploit-and-methodology_to_find for thesis (mostly about rce and dos)
-	-
