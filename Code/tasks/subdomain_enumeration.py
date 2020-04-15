@@ -2,6 +2,8 @@ import argparse
 import sys
 import os
 import celery
+import uuid
+import tempfile
 
 # for debug
 from pprint import pprint
@@ -13,31 +15,63 @@ from pprint import pprint
 
 @celery.task()
 def enum_domain(domain):
+	domain = args[0]
 	logger = enum_domain.get_logger()
-	logger.info("Running..")
+	logger.info("Running amass on %s" % domain)
+	# get domain
+
+	dictionary = '/home/te/tools/payloads/SecLists/Discovery/DNS/subdomains-top1million-5000.txt'
+
+	(fd_outfile, out_file) = tempfile.mkstemp()
+	(fd_amass, amass_out) = tempfile.mkstemp()
+	(fd_subfinder, subfinder_out) = tempfile.mkstemp()
+	(fd_findomain, findomain_out) = tempfile.mkstemp()
+	# inputFile = args.file if args.file is not None else None
+	# outFile = args.out if args.out is not None else None
+
+	tools_used = []
+	# amass(domain) if is_tool('amass') else tools_used['amass'] = True
+	# subfinder(domain, dictionary) if is_tool('subfinder') else tools_used['subfinder'] = True
+	# findomain(domain) if is_tool('findomain') else tools_used['domain'] = True
+	if is_tool('amass'):
+		amass(domain, amass_out)
+	else:
+		tools_used['amass'] = False
+
+	if is_tool('subfinder'):
+		subfinder(domain, dictionary, subfinder_out)
+	else:
+		tools_used['subfinder'] = False
+
+	if is_tool('findomain'):
+		findomain(domain, findomain_out)
+	else:
+		tools_used['findomain'] = False
+
+	process_result(domain, out_file)
 
 def is_tool(name):
     """Check whether `name` is on PATH and marked as executable."""
     from shutil import which
     return which(name) is not None
 
-def amass(domain):
-	cmd = 'amass enum -src -ip -min-for-recursive 2 -active -d {} -o amass.out'.format(domain)
+def amass(domain, out_file):
+	cmd = 'amass enum -src -ip -min-for-recursive 2 -active -d {} -o {}'.format(domain, out_file)
 	print ('Running>> ' + cmd)
 	os.system(cmd)
 	return
 
-def subfinder(domain, dictionary):
+def subfinder(domain, dictionary, out_file):
 	if dictionary is not None:
-		cmd = 'subfinder -b -d {} -nW -t 40 -w {} -o subfinder.out'.format(domain, dictionary)
+		cmd = 'subfinder -b -d {} -nW -t 40 -w {} -o {}'.format(domain, dictionary, out_file)
 	else:
 		cmd = 'subfinder -d {} -nW -t 40 -o subfinder.out'.format(domain)
 	print ('Running>> ' + cmd)
 	os.system(cmd)
 	return
 
-def findomain(domain):
-	cmd = 'findomain -t {} -i -o'.format(domain)
+def findomain(domain, out_file):
+	cmd = 'findomain -t {} -u {} -i'.format(domain, out_file)
 	print ('Running>> ' + cmd)
 	os.system(cmd)
 	return
@@ -54,30 +88,3 @@ def process_result(domain, outFile):
 	os.system(cmd)
 	return
 
-# get domain
-
-domain = args.domain
-dictionary = args.dictionary if args.dictionary is not None else None
-inputFile = args.file if args.file is not None else None
-outFile = args.out if args.out is not None else None
-
-tools_used = []
-# amass(domain) if is_tool('amass') else tools_used['amass'] = True
-# subfinder(domain, dictionary) if is_tool('subfinder') else tools_used['subfinder'] = True
-# findomain(domain) if is_tool('findomain') else tools_used['domain'] = True
-if is_tool('amass'):
-	amass(domain)
-else:
-	tools_used['amass'] = False
-
-if is_tool('subfinder'):
-	subfinder(domain, dictionary)
-else:
-	tools_used['subfinder'] = False
-
-if is_tool('findomain'):
-	findomain(domain)
-else:
-	tools_used['findomain'] = False
-
-process_result(domain, outFile)
