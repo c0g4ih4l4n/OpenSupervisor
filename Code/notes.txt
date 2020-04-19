@@ -1,0 +1,24 @@
+mongodb credentials: admin/long@2020
+db: ThesisDB
+
+app credentials: admin_db/long@2020
+
+db.createUser({
+      user: "admin",
+      pwd: "long@2020",
+      roles: [
+                { role: "userAdminAnyDatabase", db: "admin" },
+                { role: "readWriteAnyDatabase", db: "admin" },
+                { role: "dbAdminAnyDatabase",   db: "admin" }
+             ]
+  });
+
+db.createUser({
+      user: "admin_db",
+      pwd: "long@2020",
+      roles: [
+                { role: "userAdmin", db: "ThesisDB" },
+                { role: "dbAdmin",   db: "ThesisDB" },
+                { role: "readWrite", db: "ThesisDB" }
+             ]
+  });
