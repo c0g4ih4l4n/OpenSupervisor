@@ -1,30 +1,36 @@
 # from werkzeug import secure_filename
 
+import socket
 from flask import *
 
 from flask import *
 from flask_restful import Resource, Api
 from flask import jsonify
 from flask_pymongo import PyMongo
-
+import pymongo
+import urllib
+import json
+import db_utils
+from crontab import CronTab
+from bson import json_util
+import json
 
 app = Flask(__name__)
+app.url_map.strict_slashes = False
 app.secret_key = 'qweoi@#!ASDQWEJKLZXCJ'
 app.config['UPLOAD_FOLDER'] = 'upload/'
 app.config['MAX_CONTENT_PATH'] = 2048
 app.config['SQLALCHEMY_DATABASE_URI'] = ''
+mongo_user = "admin_db"
+mongo_password = "long@2020"
 
-mongo_user = 'admin_db'
-mongo_password = 'long@2020'
+app.config["MONGO_URI"] = "mongodb://%s:%s@192.168.33.10:27017/ThesisDB" % (mongo_user, urllib.parse.quote(mongo_password))
 
-app.config["MONGO_URI"] = "mongodb://%s:%s@192.168.33.10:27017" % (mongo_user, mongo_password)
 mongo = PyMongo(app)
-
-domain_collection = mongo.db.domain
 
 # client = MongoClient("mongodb://%s:%s@192.168.33.10:27017" % (mongo_user, mongo_password))  # host uri
 # db = client.ThesisDB  # Select the database
-# domain_collection = db.domain
+domain_collection = mongo.db.domain
 
 api = Api(app)
 
@@ -32,11 +38,15 @@ todos = {}
 
 class DomainList(Resource):
 	def get(self):
-		return list(domain_collection.find({}))
+		domains = domain_collection.find()
+		response = db_utils.cursor_to_json(domains)
+		return response
 
 	def post(self):
-		data = request.form['data']
-		new_domain = {"id": 1}
+		domain_name = request.form['domain_name']
+		org_name = request.form['org_name'] if request.form['org_name'] is not None else ""
+		ip = socket.gethostbyname(domain_name)
+		new_domain = {"domain_name": domain_name, "org_name": org_name, "ip": ip}
 		domain_collection.insert(new_domain)
 		return 'OK', 201
 
@@ -62,6 +72,10 @@ class ToDoSimple(Resource):
 api.add_resource(ToDoSimple, '/<string:todo_id>')
 api.add_resource(DomainList, '/domains', endpoint = 'domains')
 api.add_resource(Domain, '/domain/<int:domain_id>', endpoint = 'domain')
+
+@app.route('/domains/create')
+def create_domain():
+	return render_template('domain_create.html')
 
 @app.route('/')
 def index():
