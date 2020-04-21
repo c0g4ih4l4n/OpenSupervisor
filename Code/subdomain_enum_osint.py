@@ -80,12 +80,15 @@ def subfinder(domain, dictionary):
 
 # osint with certspotter and crtsh query
 def certspotter(domain):
-	cmd = '''curl -s "https://crt.sh/?q=%.$domain&output=json" | jq '.[].name_value' | sed 's/\"//g' | sed 's/\*\.//g' | grep -v $domain | sort -u > $PWD/hosts-crtsh.txt'''
+	url = 'https://crt.sh/?q=%.%s&output=json' % (domain)
+	res = requests.get(url)
+
+	cmd = '''curl -s https://certspotter.com/api/v0/certs\?domain\=$domain | jq '.[].dns_names[]' | sed 's/\"//g' | sed 's/\*\.//g' | grep -v $domain | sort -u > $PWD/hosts-certspotter.txt'''
 	os.system(cmd)
 	pass
 
 def crt_sh(domain):
-	cmd = '''curl -s https://certspotter.com/api/v0/certs\?domain\=$domain | jq '.[].dns_names[]' | sed 's/\"//g' | sed 's/\*\.//g' | grep -v $domain | sort -u > $PWD/hosts-certspotter.txt'''
+	cmd = '''curl -s "https://crt.sh/?q=%.$domain&output=json" | jq '.[].name_value' | sed 's/\"//g' | sed 's/\*\.//g' | grep -v $domain | sort -u > $PWD/hosts-crtsh.txt'''
 	os.system(cmd)
 	pass
 

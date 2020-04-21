@@ -2,10 +2,7 @@
 
 import socket
 from flask import *
-
-from flask import *
 from flask_restful import Resource, Api
-from flask import jsonify
 from flask_pymongo import PyMongo
 import pymongo
 import urllib
@@ -108,7 +105,6 @@ if __name__ == '__main__':
 @app.route('/visualization/<string:domain>')
 def visualization(domain):
 	# screen shot with aquatone and rename file + change location
-
 	pass
 
 @app.route('/postscan/<string:ip>')
@@ -123,6 +119,9 @@ def servicescan(ip):
 	# detect web technology with whatweb
 	# use wappanalyzer
 	pass
+
+@app.route('/scriptscan/<string:ip>')
+def
 
 @app.route('/brute-force-credentials/<string:domain>')
 def brute_credentials(domain):
