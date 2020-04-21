@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Domain Dashboard</title>
+</head>
+<body>
+	<h1>Dashboard</h1>
+	List Domains:
+	<table border="1px">
+		<tr>
+			<th>ID</th>
+			<th>Domain Name</th>
+			<th>Organization</th>
+			<th>IP</th>
+		</tr>
+		{% for domain in domains %}
+		<tr>
+			<td>{{ domain['_id'] }}</td>
+			<td>{{ domain['domain_name'] }}</td>
+			<td>{{ domain['org_name'] }}</td>
+			<td>{{ domain['ip'] }}</td>
+		</tr>
+		{% endfor %}
+	</table>
+</body>
+</html>
