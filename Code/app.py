@@ -61,7 +61,7 @@ class Domain(Resource):
 		domain['org_name'] = request.form['org_name']
 		domain['ip_list'] = domain_utils.resolve(domain_name)
 		domain['wild_card'] = domain_utils.check_subdomain_wildcard(domain_name)
-		domain_collection.update_one({'_id' : domain._id, {'$set': domain}})
+		domain_collection.update_one({'_id' : domain._id, '$set': domain})
 		return 'OK', 200
 
 	def delete(self, domain_id):
@@ -98,10 +98,6 @@ def index():
 def dashboard():
 	return render_template("domain_dashboard.html")
 
-if __name__ == '__main__':
-	app.debug = True
-	app.run()
-
 @app.route('/visualization/<string:domain>')
 def visualization(domain):
 	# screen shot with aquatone and rename file + change location
@@ -121,9 +117,15 @@ def servicescan(ip):
 	pass
 
 @app.route('/scriptscan/<string:ip>')
-def
+def scriptscan(ip):
+
+	pass
 
 @app.route('/brute-force-credentials/<string:domain>')
 def brute_credentials(domain):
 	# brute force with brutespray
 	pass
+
+if __name__ == '__main__':
+	app.debug = True
+	app.run()

@@ -12,7 +12,7 @@ from pprint import pprint
 # get all domain have no wildcard and subdomain bruteforce enabled
 
 # dictionary and resolver
-dictionary_list = {'all':'all.txt', 'top5000': '', 'top20000': ''}
+dictionary_list = {'all':'all.txt', 'top5000': '', 'top2000': ''}
 resolver_file = ''
 out_file = ''
 PWD = ''

@@ -13,6 +13,6 @@ def check_subdomain_wildcard(domain):
 	return False
 
 def resolve(domain, type='A'):
-	if type in ['A'. 'AAAA']:
+	if type in ['A', 'AAAA']:
 		result = dns.resolver.query(domain, type)
 	return result
