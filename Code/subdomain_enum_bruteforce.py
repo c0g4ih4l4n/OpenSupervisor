@@ -25,31 +25,51 @@ client = MongoClient('mongodb://%s:%s@192.168.33.10' % (username, urllib.parse.q
 
 db = client.ThesisDB
 domain_collection = db.domain
+
+# bruteforce
+# domain wildcard use subfinder, if not use massdns
 list_domain = get_list_domain_bruteforce()
+list_subdomain = {}
 for domain in list_domain:
+	list_subdomain['domain'] = set()
 	domain_dict_file = 'bruteforce_file.txt'
 	out_file = 'result.txt'
 	create_bruteforce_dict(domain, dictionary_list['all'], domain_dict_file)
 
-	cmd = 'massdns -r %s -t A -o S -w "%s" %s' % (resolver_file, out_file, domain_dict_file)
-	os.system(cmd)
+	if is_tool('massdns'):
+		massdns(domain, domain_dict_file, resolver_file)
+	else:
+		tools_used['massdns'] = False
 
+	if is_tool('subfinder'):
+		subfinder(domain, domain_dict_file)
+	else:
+		tools_used['subfinder'] = False
 
 def get_list_domain_bruteforce():
 	domain_all = domain_collection.find({'bruteforce': True})
 	list_domain = [x['domain_name'] for x in domain_all]
 	return list_domain
 
+def massdns(domain, dictionary, resolver_file):
+	out_file = str(uuid.uuid4())
+	cmd = 'massdns -r %s -t A -o S -w "%s" %s' % (resolver_file, out_file, dictionary)
+	os.system(cmd)
+	with open(out_file, 'r') as file:
+		subdomains = file.readlines()
+	subdomains = [x for x in subdomains]
+	list_subdomain['domain'].update(subdomains)
+	return
 
-if is_tool('massdns'):
-	amass(domain)
-else:
-	tools_used['massdns'] = False
-
-if is_tool('subfinder'):
-	subfinder(domain, dictionary)
-else:
-	tools_used['subfinder'] = False
+def subfinder(domain, dictionary):
+	out_file = str(uuid.uuid4())
+	cmd = 'subfinder -d {} -nW -t 40 -o {} -b -w {}'.format(domain, out_file, dictionary)
+	os.system(cmd)
+	with open(out_file, 'r') as file:
+		subdomains = file.readlines()
+	subdomains = [x for x in subdomains]
+	list_subdomain['domain'].update(subdomains)
+	return
 
 def create_bruteforce_dict(domain, dict_name, out_file):
 	cmd = 'sed "s/$/.%s/" %s > %s/%s' % (domain, dict_name, PWD, out_file)
