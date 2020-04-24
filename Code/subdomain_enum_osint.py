@@ -19,6 +19,8 @@ main_app = 'http://127.0.0.1:5000'
 mongo_user = "admin_db"
 mongo_password = "long@2020"
 
+slack_webhook = ''
+
 client = MongoClient('mongodb://%s:%s@192.168.33.10' % (username, urllib.parse.quote(password)))
 
 db = client.ThesisDB
@@ -40,11 +42,11 @@ def osint_update(domain):
 	dictionary = ''
 	tools_used = []
 	if is_tool('amass'):
-		sub_osint_amass = amass(domain)
+		amass(domain)
 	else:
 		tools_used['amass'] = False
 	if is_tool('subfinder'):
-		sub_osint_subfinder = subfinder(domain, dictionary)
+		subfinder(domain, dictionary)
 	else:
 		tools_used['subfinder'] = False
 	if is_tool('findomain'):
@@ -57,7 +59,16 @@ def osint_update(domain):
 	crt_sh(domain)
 
 	# list_subdomains_osint
-	import_to_database(list_subdomains_osint)
+	takeover_domain = domain_utils.find_subdomain_takeover(list_subdomains_osint)
+	# save it to database
+	# send notification with webhook
+	# use slack webhook
+	
+
+
+	# resolve ip use massdns
+	domains, ips = massdns_resolve_ip()
+	import_to_database(domains, ips)
 
 def get_list_domain():
 	list_domain_url = main_app + '/api/domains/list'
@@ -127,7 +138,7 @@ def crt_sh(domain):
 	list_subdomains_osint.update(domain_crt_sh)
 	return
 
-def import_to_database(domain, file):
+def import_to_database(domains, ips):
 	domain_entity = domain_collection.find({'domain_name': domain});
 	domain_entity['subdomains'] = subdomains
 	domain_collection.updateOne({'domain_name': domain, {'$set': domain_entity}})

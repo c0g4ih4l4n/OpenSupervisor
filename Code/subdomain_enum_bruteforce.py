@@ -56,8 +56,8 @@ def massdns(domain, dictionary, resolver_file):
 	cmd = 'massdns -r %s -t A -o S -w "%s" %s' % (resolver_file, out_file, dictionary)
 	os.system(cmd)
 	with open(out_file, 'r') as file:
-		subdomains = file.readlines()
-	subdomains = [x for x in subdomains]
+		lines = file.readlines()
+	subdomains = [x.split()[0] for x in lines]
 	list_subdomain['domain'].update(subdomains)
 	return
 
