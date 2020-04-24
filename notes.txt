@@ -2,3 +2,7 @@ search by email
 
 $search
 injection point email
+
+python nmap 
+check wait in sync portscanner for better way
+add os and script scan result to class PortScannerDict
