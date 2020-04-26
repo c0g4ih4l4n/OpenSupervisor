@@ -74,6 +74,11 @@ def subfinder(domain, dictionary):
 def create_bruteforce_dict(domain, dict_name, out_file):
 	cmd = 'sed "s/$/.%s/" %s > %s/%s' % (domain, dict_name, PWD, out_file)
 	os.system(cmd)
+	
+def is_tool(name):
+    """Check whether `name` is on PATH and marked as executable."""
+    from shutil import which
+    return which(name) is not None
 
 def process_out_file(out_file):
 	# process outfile and write to db

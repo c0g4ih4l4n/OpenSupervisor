@@ -1,7 +1,6 @@
 import socket
 import os
 import dns.resolver
-from uuid import uuid
 import tempfile
 
 resolver_file = ''

@@ -3,3 +3,6 @@ Training/
 flask-base/
 Code/venv/
 Code/test/
+env/.vagrant/
+env/data/
+Code/__pycache__/

@@ -21,7 +21,7 @@ mongo_password = "long@2020"
 
 slack_webhook = ''
 
-client = MongoClient('mongodb://%s:%s@192.168.33.10' % (username, urllib.parse.quote(password)))
+client = MongoClient('mongodb://%s:%s@192.168.33.10/ThesisDB' % (mongo_user, urllib.parse.quote(mongo_password)))
 
 db = client.ThesisDB
 domain_collection = db.domain

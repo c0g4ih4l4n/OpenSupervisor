@@ -6,3 +6,13 @@ injection point email
 python nmap 
 check wait in sync portscanner for better way
 add os and script scan result to class PortScannerDict
+
+Mongo DB Authen credentials:
+admin/password
+admin_db/long@2020
+
+ThesisDB:
+domain
+ip
+service
+script
