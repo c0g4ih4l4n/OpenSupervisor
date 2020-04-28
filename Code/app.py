@@ -59,8 +59,8 @@ class Domain(Resource):
 		domain = domain_collection.find({'id': domain_id})
 		domain['domain_name'] = request.form['domain_name']
 		domain['org_name'] = request.form['org_name']
-		domain['ip_list'] = domain_utils.resolve(domain_name)
-		domain['wild_card'] = domain_utils.check_subdomain_wildcard(domain_name)
+		domain['ip_list'] = domain_utils.resolve(request.form['domain_name'])
+		domain['wild_card'] = domain_utils.check_subdomain_wildcard(request.form['domain_name'])
 		domain_collection.update_one({'_id' : domain._id, '$set': domain})
 		return 'OK', 200
 

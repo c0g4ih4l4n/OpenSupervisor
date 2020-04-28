@@ -34,17 +34,16 @@ for domain in list_domain:
 	list_subdomain['domain'] = set()
 	domain_dict_file = 'bruteforce_file.txt'
 	out_file = 'result.txt'
+	tools_used = []
 	create_bruteforce_dict(domain, dictionary_list['all'], domain_dict_file)
 
 	if is_tool('massdns'):
 		massdns(domain, domain_dict_file, resolver_file)
-	else:
-		tools_used['massdns'] = False
+		tools_used.append('massdns')
 
 	if is_tool('subfinder'):
 		subfinder(domain, domain_dict_file)
-	else:
-		tools_used['subfinder'] = False
+		tools_used.append('subfinder')
 
 def get_list_domain_bruteforce():
 	domain_all = domain_collection.find({'bruteforce': True})
@@ -82,3 +81,4 @@ def is_tool(name):
 
 def process_out_file(out_file):
 	# process outfile and write to db
+	pass

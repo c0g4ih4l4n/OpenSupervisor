@@ -4,6 +4,7 @@ $search
 injection point email
 
 python nmap 
+get raw xml to chain with brutespray
 check wait in sync portscanner for better way
 add os and script scan result to class PortScannerDict
 
@@ -16,3 +17,37 @@ domain
 ip
 service
 script
+test xss hunter
+
+phần mềm là một hệ thống bao gồm nhiều chức năng, trong đó cần thiết phải nêu chi tiết các chức năng chính yếu (các chức năng chính yếu nên có sự liên kết với nhau để hỗ trợ người dùng hoàn thành một tác vụ chủ yếu nào đó)
+
+ví dụ chức năng monitor subdomain, port scanning, logging ở server-side,...
+hỗ trợ cho chức năng dò tìm lỗ hổng
+từ đó đề xuất cho người dùng các phương án phòng thủ
+-> báo cáo sẽ giúp người đọc dễ theo dõi
+
+System:
+
+Login & Authentication
+
+Monitoring domains
+    All time, 
+    Domain expire and send email to notification
+
+Scan ip:
+    Port Scanning
+    Service Scanning
+    OS Detection
+    Script scan
+        Scan with categories: auth, banner
+        Web technology detect
+        Brute Spray
+        Vulnerable Scan -> Attack vector and Mitigation methods
+        Custom script to scan HTTP Desync Attack
+
+Log monitoring:
+    
+
+Server listen for request:
+    XSS Hunter
+    SSRF Server
