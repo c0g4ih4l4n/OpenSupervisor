@@ -9,6 +9,7 @@ import uuid
 import tempfile
 import domain_utils
 import uuid
+import re
 
 # for debug
 from pprint import pprint
@@ -120,7 +121,7 @@ def certspotter(domain):
 		res = requests.get(url)
 	except requests.exceptions.HTTPError:
 		return
-	if len(res.json()) == 0:
+	if res.status_code != '200':
 		return
 	domains_cert_revelant = res.json()[0]['dns_names']
 	list_subdomains_osint.update(domains_cert_revelant)
@@ -137,7 +138,10 @@ def crt_sh(domain):
 	if len(res.json()) == 0:
 		return
 
-	domain_crt_sh = res.json()['name_value']
+	domain_crt_sh = []
+	for cert in res.json():
+		domain_crt_sh.extend(cert['name_value'].split('\n'))
+
 	list_subdomains_osint.update(domain_crt_sh)
 	return
 

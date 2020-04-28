@@ -23,8 +23,8 @@ def resolve(domain, type='A'):
 
 def find_subdomain_takeover_bug(domain_list):
 	# parse domain_list to file
-	f = tempfile.NamedTemporaryFile(mode='w+b', delete=False)
-	out_file = tempfile.NamedTemporaryFile(mode='w+b', delete=False)
+	f = tempfile.NamedTemporaryFile(mode='w+', delete=False)
+	out_file = tempfile.NamedTemporaryFile(mode='w+', delete=False)
 	for domain in domain_list:
 		f.write(domain + '\n')
 	f.close()
@@ -32,8 +32,9 @@ def find_subdomain_takeover_bug(domain_list):
 	cmd = 'subjack -w {} -t 100 -timeout 30 -o {} -ssl'.format(f.name, out_file.name)
 	os.system(cmd)
 
-	out_file.open()
-	subdomains_takeover = [x for x in out_file.readlines()]
+	with open(out_file.name, 'r') as file:
+		lines = file.readlines()
+	subdomains_takeover = [x for x in lines]
 	os.remove(f.name)
 	os.remove(out_file.name)
 
@@ -42,17 +43,16 @@ def find_subdomain_takeover_bug(domain_list):
 def massdns_resolve_ip(domain_list, dictionary, resolver_file):
 	result = {}
 	ips = set()
-	f = tempfile.NamedTemporaryFile(mode='w+b', delete=False)
-	out_file = tempfile.NamedTemporaryFile(mode='w+b', delete=False)
+	f = tempfile.NamedTemporaryFile(mode='w+', delete=False)
+	out_file = tempfile.NamedTemporaryFile(mode='w+', delete=False)
 	for domain in domain_list:
 		f.write(domain + '\n')
 	f.close()
 	cmd = 'massdns -r %s -t A -o S -w "%s" %s' % (resolver_file, out_file.name, f.name)
 	os.system(cmd)
 
-	out_file.open()
-	lines = out_file.readlines()
-	out_file.close()
+	with open(out_file.name, 'r') as file:
+		lines = file.readlines()
 
 	for res in lines: 
 		result[res.split()[0]] = res.split()[2]
