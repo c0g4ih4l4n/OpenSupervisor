@@ -1,1 +1,0 @@
-{"virtualbox":{"/home/vagrant/data":{"guestpath":"/home/vagrant/data","hostpath":"/mnt/work/Thesis/env/data","disabled":false,"__vagrantfile":true},"/vagrant":{"guestpath":"/vagrant","hostpath":"/mnt/work/Thesis/env","disabled":false,"__vagrantfile":true}}}

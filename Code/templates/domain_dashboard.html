@@ -5,6 +5,13 @@
 </head>
 <body>
 	<h1>Dashboard</h1>
+	<div class="vertical-menu">
+		<a href="#" class="active">Home</a>
+		<a href="{{ url_for('domain_dashboard') }}">Dashboard</a>
+		<a href="{{ url_for('api.subdomain', domain_name='example.com') }}">Link 2</a>
+		<a href="#">Link 3</a>
+		<a href="#">Link 4</a>
+	</div>
 	List Domains:
 	<table border="1px">
 		<tr>
@@ -22,5 +29,6 @@
 		</tr>
 		{% endfor %}
 	</table>
+	<a href="{{ url_for('create_domain') }}">Create new one</a>
 </body>
 </html>

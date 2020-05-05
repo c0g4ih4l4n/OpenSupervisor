@@ -19,7 +19,10 @@ def check_subdomain_wildcard(domain):
 def resolve(domain, type='A'):
 	if type in ['A', 'AAAA']:
 		result = dns.resolver.query(domain, type)
-	return result
+	ip_list = []
+	for ip in result:
+		ip_list.append(ip.to_text())
+	return ip_list
 
 def find_subdomain_takeover_bug(domain_list):
 	# parse domain_list to file

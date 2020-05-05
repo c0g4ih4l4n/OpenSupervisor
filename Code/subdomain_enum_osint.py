@@ -8,7 +8,6 @@ import urllib
 import uuid
 import tempfile
 import domain_utils
-import uuid
 import re
 
 # for debug
@@ -147,7 +146,7 @@ def crt_sh(domain):
 
 def insert_domain_to_db(parent_domain, domain):
 	if parent_domain is None:
-		domain_collection.insert({'domain_name': domain})
+		domain_collection.insert({'domain_name': domain, 'bruteforce': True})
 		return
 
 	domain_entity = domain_collection.find({'domain_name': parent_domain})	
@@ -163,6 +162,9 @@ def import_to_database(domain, subdomains, ips):
 	domain_entity = domain_collection.find({'domain_name': domain})
 	if domain_entity is None:
 		insert_domain_to_db(None, domain)
+
+	for subdomain in subdomains:
+		subdomain['bruteforce'] = True
 	domain_entity['subdomains'] = subdomains
 	domain_collection.update_one({'_id': domain['_id']}, {'$set': domain_entity})
 	ip_collection = db.ip

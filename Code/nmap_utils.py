@@ -1,4 +1,5 @@
 import nmap
+from pymongo import MongoClient
 
 # get all ip
 # pull script list with each service
@@ -10,7 +11,7 @@ mongo_password = "long@2020"
 
 slack_webhook = ''
 
-client = MongoClient('mongodb://%s:%s@192.168.33.10' % (username, urllib.parse.quote(password)))
+client = MongoClient('mongodb://%s:%s@192.168.33.10' % (mongo_user, urllib.parse.quote(mongo_password)))
 
 db = client.ThesisDB
 ip_coletn = db.ip
@@ -30,7 +31,6 @@ def scan_all_port(ip_list):
 	pass
 
 def all_port_cb(hosts, scan_data):
-	
 	pass
 
 def scan_service():

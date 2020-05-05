@@ -21,7 +21,7 @@ main_app = 'http://127.0.0.1:5000'
 mongo_user = "admin_db"
 mongo_password = "long@2020"
 
-client = MongoClient('mongodb://%s:%s@192.168.33.10' % (username, urllib.parse.quote(password)))
+client = MongoClient('mongodb://%s:%s@192.168.33.10' % (mongo_user, urllib.parse.quote(mongo_password)))
 
 db = client.ThesisDB
 domain_collection = db.domain
