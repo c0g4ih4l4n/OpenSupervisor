@@ -12,6 +12,7 @@ from crontab import CronTab
 from bson import json_util
 import json
 import domain_utils
+from bson.json_util import dumps
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -50,30 +51,30 @@ class DomainListAPI(Resource):
 		
 		new_domain = {"domain_name": domain_name, "org_name": org_name, "ips": ip_list, 'wild_card': wild_card, "brute_force": brute_force}
 		dm_clt.insert(new_domain)
-		return 'OK', 201
+		return redirect(url_for('target_dashboard'))
 
 class SubDomainAPI(Resource):
 	def get(self, domain_name):
+		headers = {}
 		domain_entity = dm_clt.find({'domain_name': domain_name})
 		subdomains = domain_entity['domain_name']
 		return make_response(render_template('domain_dashboard.html', domains=subdomains), 200, headers)
 
-	def put(self, domain_name):
-		domain_name_old = request.form['old_domain']
-		domain = dm_clt.find({'domain_name': domain_name_old})
-		domain['domain_name'] = request.form['domain_name']
-		domain['org_name'] = request.form['org_name']
-		domain['ips'] = domain_utils.resolve(request.form['domain_name'])
-		domain['wild_card'] = domain_utils.check_subdomain_wildcard(request.form['domain_name'])
-		dm_clt.update_one({'_id' : domain._id, '$set': domain})
-		return 'OK', 200
-
-	def delete(self, domain_name):
-		dm_clt.remove({'_id': domain_name})
-		return
+	def post(self, domain_name):
+		if request.form['_method'] == 'PUT':
+			domain = dm_clt.find_one({'domain_name': domain_name})
+			domain['domain_name'] = request.form['domain_name']
+			domain['org_name'] = request.form['org_name']
+			domain['ips'] = domain_utils.resolve(request.form['domain_name'])
+			domain['wild_card'] = domain_utils.check_subdomain_wildcard(request.form['domain_name'])
+			dm_clt.update_one({'_id' : domain['_id']}, {'$set': domain})
+			return redirect(url_for('target_dashboard'))
+		elif request.form['_method'] == 'DELETE':
+			dm_clt.remove({'domain_name': domain_name})
+			return redirect(url_for('target_dashboard'))
 
 api.add_resource(DomainListAPI, '/targets', endpoint = 'api.domains')
-api.add_resource(SubDomainAPI, '/target/<string:domain_name>', endpoint = 'api.subdomain')
+api.add_resource(SubDomainAPI, '/targets/<string:domain_name>', endpoint = 'api.subdomain')
 
 @app.route('/api/domains/list')
 def domain_list():
@@ -114,12 +115,14 @@ def create_domain():
 def edit_domain(domain_name):
 	# get domain entity for 
 	domain_entity = dm_clt.find_one({'domain_name': domain_name})
-	return domain_entity['ips']
 	return render_template('targets_edit.html', edited_domain=domain_entity)
 
 
+@app.route('/targets/<string:domain_name>/scan')
+def subdomain_enumeration(domain_name):
 
-
+	
+	return
 
 
 

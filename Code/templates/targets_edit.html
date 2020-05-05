@@ -3,24 +3,33 @@
 <head>
 	<title>Subdomain Dashboard</title>
 </head>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <body>
 	<h1>Dashboard</h1>
 	<h3>Create new domain</h3>
-	<form action="{{ url_for('api.domains', domain_name=edited_domain.domain_name) }}" method="POST">
+	<form action="{{ url_for('api.subdomain', domain_name=edited_domain.domain_name) }}" method="POST">
+        <input type="hidden" name="_method" value="PUT" />
+        <div type="hidden">
+            <label for="">ObjectId</label>
+            <input type="text" name="object_id" value="{{ edited_domain._id }}">
+        </div>
+        <br>
 		<label>Domain</label>
-		<input type="text" name="domain_name" value="">
+		<input type="text" name="domain_name" value="{{ edited_domain.domain_name }}">
 		<br>
 		<label>Organization Name</label>
-		<input type="text" name="org_name">
+		<input type="text" name="org_name" value="{{ edited_domain.org_name }}">
 		<br>
 		<label for="bruteforce-option">Brute Force</label>
 		<br>
 		<label for="">Yes</label>
-		<input type="radio" name="brute_force" value="1">
+		<input type="radio" name="brute_force" value="1" {% if edited_domain.brute_force %} checked {% endif %}>
 		<label for="">No</label>
-		<input type="radio" name="brute_force" value="0">
+		<input type="radio" name="brute_force" value="0" {% if not edited_domain.brute_force %} checked {% endif %}>
 		<br>
-		<input type="submit" value="Create">
-	</form>
+		<input id="submit" type="submit" value="Update">
+    </form>
+    
 </body>
 </html>
