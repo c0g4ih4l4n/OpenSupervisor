@@ -1,5 +1,6 @@
 import nmap
 from pymongo import MongoClient
+import urllib
 
 # get all ip
 # pull script list with each service
@@ -20,8 +21,21 @@ ip_coletn = db.ip
 # some common are nginx/phpfpm
 # apache solr
 # Scan cve with that technology
+# tor scan with nmap using proxychain, tor, nmap
 
 categories = ['auth', 'broadcast', 'brute', 'default', 'discovery', 'dos', 'exploit', 'external', 'fuzzer', 'intrusive', 'malware', 'safe', 'version', 'vuln']
+
+def regular_scan_port(ip):
+	nm = nmap.PortScannerAsync()
+	nm.scan(ip, callback=regular_port_cb, sudo=False)
+
+def regular_port_cb(hosts, scan_data):
+
+	return
+
+def tor_network_scan_port(ip):
+
+	return
 
 def scan_all_port(ip_list):
 	port_range = '1-65535'

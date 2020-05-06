@@ -13,13 +13,19 @@ from bson import json_util
 import json
 import domain_utils
 from bson.json_util import dumps
+from flask_celery import make_celery
+import subdomain_enum_osint
 
 app = Flask(__name__)
+app.config.from_object('config')
+
 app.url_map.strict_slashes = False
 app.secret_key = 'qweoi@#!ASDQWEJKLZXCJ'
 app.config['UPLOAD_FOLDER'] = 'upload/'
 app.config['MAX_CONTENT_PATH'] = 2048
 app.config['SQLALCHEMY_DATABASE_URI'] = ''
+app.config['CELERY_BROKER_URI'] = ''
+app.config['CELERY_BACKEND'] = ''
 mongo_user = "admin_db"
 mongo_password = "long@2020"
 
@@ -34,6 +40,7 @@ dm_clt = mongo.db.domain
 api = Api(app)
 
 todos = {}
+celery = make_celery(app)
 
 class DomainListAPI(Resource):
 	def get(self):
@@ -120,15 +127,15 @@ def edit_domain(domain_name):
 
 @app.route('/targets/<string:domain_name>/scan')
 def subdomain_enumeration(domain_name):
+	# push task to redis 
+	subdomain_enum_task.delay(domain_name)
 
-	
+	return redirect(url_for('api.domains'))
+
+@celery.task(name='app.subdomain_scan')
+def subdomain_enum_task(domain):
+	subdomain_enum_osint.osint_update(domain)
 	return
-
-
-
-
-
-
 
 
 
@@ -143,7 +150,13 @@ def visualization(domain):
 @app.route('/postscan/<string:ip>')
 def portscan(ip):
 	# scan with 2 modules
+	portscan(ip)
 	pass
+
+@celery.task(name='app.ip_scan')
+def ip_scan(domain):
+	subdomain_enum_osint.osint_update(domain)
+	return
 
 @app.route('/servicescan/<string:ip>')
 def servicescan(ip):

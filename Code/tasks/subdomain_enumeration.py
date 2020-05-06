@@ -1,90 +1,182 @@
 import argparse
 import sys
 import os
-import celery
+import requests
+import pymongo
+from pymongo import MongoClient
+import urllib
 import uuid
 import tempfile
+import domain_utils
+import re
 
 # for debug
 from pprint import pprint
 
 # output only subdomain files
 # add option to output with ip with domains.
+# add draw graph
 
 # scripts automate enum domain using amass, subfinder, findomain
+main_app = 'http://127.0.0.1:5000'
+mongo_user = "admin_db"
+mongo_password = "long@2020"
 
-@celery.task()
-def enum_domain(domain):
-	domain = args[0]
-	logger = enum_domain.get_logger()
-	logger.info("Running amass on %s" % domain)
-	# get domain
+resolver_file = 'materials/resolver.txt'
 
-	dictionary = '/home/te/tools/payloads/SecLists/Discovery/DNS/subdomains-top1million-5000.txt'
+slack_webhook = ''
 
-	(fd_outfile, out_file) = tempfile.mkstemp()
-	(fd_amass, amass_out) = tempfile.mkstemp()
-	(fd_subfinder, subfinder_out) = tempfile.mkstemp()
-	(fd_findomain, findomain_out) = tempfile.mkstemp()
-	# inputFile = args.file if args.file is not None else None
-	# outFile = args.out if args.out is not None else None
+client = MongoClient('mongodb://%s:%s@192.168.33.10/ThesisDB' % (mongo_user, urllib.parse.quote(mongo_password)))
 
+db = client.ThesisDB
+domain_collection = db.domain
+
+
+def get_list_domain():
+	print ('[-] Getting List Domain')
+	domain_all = domain_collection.find({})
+	list_domain_extract = [x['domain_name'] for x in domain_all]
+	return list_domain_extract
+
+def osint_update(domain):
+	dictionary = ''
 	tools_used = []
-	# amass(domain) if is_tool('amass') else tools_used['amass'] = True
-	# subfinder(domain, dictionary) if is_tool('subfinder') else tools_used['subfinder'] = True
-	# findomain(domain) if is_tool('findomain') else tools_used['domain'] = True
-	if is_tool('amass'):
-		amass(domain, amass_out)
-	else:
-		tools_used['amass'] = False
+	# if is_tool('amass'):
+	# 	print ("[-] Running amass ..")
+	# 	amass(domain)
+	# 	tools_used.append('amass')
+	# if is_tool('subfinder'):
+	# 	print ("[-] Running subfinder ..")
+	# 	subfinder(domain, dictionary)
+	# 	tools_used.append('subfinder')
+	# if is_tool('findomain'):
+	# 	print ("[-] Running findomain ..")
+	# 	findomain(domain)
+	# 	tools_used.append('findomain')
 
-	if is_tool('subfinder'):
-		subfinder(domain, dictionary, subfinder_out)
-	else:
-		tools_used['subfinder'] = False
+	# cert tranparent logs
+	print ("[-] Fetching certspotter ..")
+	certspotter(domain)
+	print ("[-] Fetching crtsh ..")
+	crt_sh(domain)
 
-	if is_tool('findomain'):
-		findomain(domain, findomain_out)
-	else:
-		tools_used['findomain'] = False
+	# list_subdomains_osint
+	takeover_domain = domain_utils.find_subdomain_takeover_bug(list_subdomains_osint)
+	# save it to database
+	# send notification with webhook
+	# use slack webhook
+	
 
-	process_result(domain, out_file)
+
+	# resolve ip use massdns
+	subdomains, ips = domain_utils.massdns_resolve_ip(list_subdomains_osint, '', resolver_file)
+
+	print ("[-] Updating DB ..")
+	import_to_database(domain, subdomains, ips)
 
 def is_tool(name):
     """Check whether `name` is on PATH and marked as executable."""
     from shutil import which
     return which(name) is not None
 
-def amass(domain, out_file):
-	cmd = 'amass enum -src -ip -min-for-recursive 2 -active -d {} -o {}'.format(domain, out_file)
-	print ('Running>> ' + cmd)
-	os.system(cmd)
+def update_set_domains_file(filename, tool):
+	with open(filename, 'r') as file:
+		subdomains = file.readlines()
+	if tool == 'amass':
+		subdomains = [x.split()[1] for x in subdomains]
+	elif tool == 'subfinder' or tool == 'findomain':
+		subdomains = [x for x in subdomains]
+	list_subdomains_osint.update(subdomains)
+	os.remove(filename)
 	return
 
-def subfinder(domain, dictionary, out_file):
-	if dictionary is not None:
-		cmd = 'subfinder -b -d {} -nW -t 40 -w {} -o {}'.format(domain, dictionary, out_file)
-	else:
-		cmd = 'subfinder -d {} -nW -t 40 -o subfinder.out'.format(domain)
-	print ('Running>> ' + cmd)
+# running tool
+def amass(domain):
+	f = tempfile.NamedTemporaryFile(mode='w+b', delete=False)
+	cmd = 'amass enum -src -ip -min-for-recursive 2 -active -d {} -o {}'.format(domain, f.name)
 	os.system(cmd)
+	update_set_domains_file(f.name, 'amass')
 	return
 
-def findomain(domain, out_file):
-	cmd = 'findomain -t {} -u {} -i'.format(domain, out_file)
-	print ('Running>> ' + cmd)
+def subfinder(domain, dictionary):
+	f = tempfile.NamedTemporaryFile(mode='w+b', delete=False)
+	cmd = 'subfinder -d {} -nW -t 40 -o {}'.format(domain, f.name)
 	os.system(cmd)
+	update_set_domains_file(f.name, 'subfinder')
 	return
 
-def process_result(domain, outFile):
-	# process result
-	cmd = "cat amass.out| awk -F ']' '{print $2}' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | awk -F ' ' '{print $1}'> amass_domain.out;"
-	cmd += "cat {}.txt | awk -F ',' '{{print $1}}' > findomain_domain.out;".format(domain)
-	cmd += 'cat amass_domain.out subfinder.out findomain_domain.out | sort -u > {};'.format(outFile)
-
-	# clean file
-	cmd += 'rm amass.out amass_domain.out subfinder.out {}.txt findomain_domain.out'.format(domain)
-	print ('Running>> {};\nFinish! Result File: {}'.format(cmd, outFile))
+def findomain(domain):
+	f_name = str(uuid.uuid4())
+	cmd = 'findomain -t {} -u {}'.format(domain, '/tmp/' + f_name)
 	os.system(cmd)
+	update_set_domains_file ('/tmp/' + f_name, 'findomain')
 	return
 
+# osint with certspotter and crtsh query
+# Cert tranparentcy
+def certspotter(domain):
+	url = 'https://certspotter.com/api/v0/certs\?domain={}'.format(domain)
+	try:
+		res = requests.get(url)
+	except requests.exceptions.HTTPError:
+		return
+	if res.status_code != '200':
+		return
+	domains_cert_revelant = res.json()[0]['dns_names']
+	list_subdomains_osint.update(domains_cert_revelant)
+	return
+
+# crt.sh not working
+def crt_sh(domain):
+	url = 'https://crt.sh/?q=%25.{}&output=json'.format(domain)
+	try:
+		res = requests.get(url)
+	except requests.exceptions.HTTPError:
+		return
+
+	if len(res.json()) == 0:
+		return
+
+	domain_crt_sh = []
+	for cert in res.json():
+		domain_crt_sh.extend(cert['name_value'].split('\n'))
+
+	list_subdomains_osint.update(domain_crt_sh)
+	return
+
+def insert_domain_to_db(parent_domain, domain):
+	if parent_domain is None:
+		domain_collection.insert({'domain_name': domain, 'bruteforce': True})
+		return
+
+	domain_entity = domain_collection.find({'domain_name': parent_domain})	
+	if domain_entity is None:
+		raise ValueError('Parent domain does not exists in DB...')
+
+	domain_new_ent = {'domain_name': domain}
+	domain_entity['subdomains'].append(domain_new_ent)
+	domain_collection.update_one({'_id': domain['_id']}, {'$set': domain_entity})
+	return
+
+def import_to_database(domain, subdomains, ips):
+	domain_entity = domain_collection.find({'domain_name': domain})
+	if domain_entity is None:
+		insert_domain_to_db(None, domain)
+
+	for subdomain in subdomains:
+		subdomain['bruteforce'] = True
+	domain_entity['subdomains'] = subdomains
+	domain_collection.update_one({'_id': domain['_id']}, {'$set': domain_entity})
+	ip_collection = db.ip
+	return
+
+if __name__ == '__main__':
+	list_domain = get_list_domain()
+
+	# domains type set
+	list_subdomains_osint = set()
+
+	for domain in list_domain:
+		print ("[-] Running on {}.".format(domain))
+		osint_update (domain)
+		list_subdomains_osint.clear()

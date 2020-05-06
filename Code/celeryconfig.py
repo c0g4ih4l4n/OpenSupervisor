@@ -1,5 +1,8 @@
 from celery.schedules import crontab
 
+redbeat_redis_url = "redis://127.0.0.1:6379/1"
+redbeat_lock_key = None
+
 CELERY_IMPORTS = ('tasks.subdomain_enumeration')
 CELERY_TASK_RESULT_EXPIRES = 30
 CELERY_TIMEZONE = 'UTC'
