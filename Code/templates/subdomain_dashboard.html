@@ -4,20 +4,26 @@
 	<title>Subdomain Dashboard</title>
 </head>
 <body>
-	<h1>Dashboard</h1>
+	<h1>Subdomain Dashboard</h1>
+	<h2>Domain: {{ domain['domain_name'] }}</h2>
+	<h3><a href="{{ url_for('api.domains') }}">Back</a></h3>
 	List Domains:
 	<table border="1px">
 		<tr>
 			<th>ID</th>
-			<th>Domain Name</th>
-			<th>Number Subdomains</th>
-			<th>Web Subdomains</th>
+			<th>Subdomain Name</th>
+			<th>IP</th>
+			<th>Expired Time</th>
 		</tr>
 		<tr>
-			<td>1</td>
-			<td>example.com</td>
-			<td>2</td>
-			<td>sub.example.com</td>
+			{% set i = 1 %}
+			{% for domain in domain['subdomains'] %}
+			<td>{{ i }}</td>
+			<td>{{ domain['domain_name'] }}</td>
+			<td>{{ domain['ip'] }}</td>
+			<td>{{ domain['domain_name'] }}</td>
+			{% set i = i + 1 %}
+			{% endfor %}
 		</tr>
 	</table>
 </body>

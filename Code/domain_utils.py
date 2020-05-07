@@ -18,7 +18,11 @@ def check_subdomain_wildcard(domain):
 
 def resolve(domain, type='A'):
 	if type in ['A', 'AAAA']:
-		result = dns.resolver.query(domain, type)
+		try:
+			result = dns.resolver.query(domain, type)
+		except:
+			return None
+
 	ip_list = []
 	for ip in result:
 		ip_list.append(ip.to_text())

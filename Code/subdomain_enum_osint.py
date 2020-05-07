@@ -30,6 +30,7 @@ client = MongoClient('mongodb://%s:%s@192.168.33.10/ThesisDB' % (mongo_user, url
 
 db = client.ThesisDB
 domain_collection = db.domain
+list_subdomains_osint = set()
 
 
 def get_list_domain():
@@ -41,18 +42,18 @@ def get_list_domain():
 def osint_update(domain):
 	dictionary = ''
 	tools_used = []
-	# if is_tool('amass'):
-	# 	print ("[-] Running amass ..")
-	# 	amass(domain)
-	# 	tools_used.append('amass')
-	# if is_tool('subfinder'):
-	# 	print ("[-] Running subfinder ..")
-	# 	subfinder(domain, dictionary)
-	# 	tools_used.append('subfinder')
-	# if is_tool('findomain'):
-	# 	print ("[-] Running findomain ..")
-	# 	findomain(domain)
-	# 	tools_used.append('findomain')
+	if is_tool('amass'):
+		print ("[-] Running amass ..")
+		amass(domain)
+		tools_used.append('amass')
+	if is_tool('subfinder'):
+		print ("[-] Running subfinder ..")
+		subfinder(domain, dictionary)
+		tools_used.append('subfinder')
+	if is_tool('findomain'):
+		print ("[-] Running findomain ..")
+		findomain(domain)
+		tools_used.append('findomain')
 
 	# cert tranparent logs
 	print ("[-] Fetching certspotter ..")
@@ -155,7 +156,7 @@ def insert_domain_to_db(parent_domain, domain):
 
 	domain_new_ent = {'domain_name': domain}
 	domain_entity['subdomains'].append(domain_new_ent)
-	domain_collection.update_one({'_id': domain['_id']}, {'$set': domain_entity})
+	domain_collection.update_one({'_id': domain_entity['_id']}, {'$set': domain_entity})
 	return
 
 def import_to_database(domain, subdomains, ips):
@@ -164,9 +165,10 @@ def import_to_database(domain, subdomains, ips):
 		insert_domain_to_db(None, domain)
 
 	for subdomain in subdomains:
-		subdomain['bruteforce'] = True
+		subdomain['bruteforce'] = False
+		subdomain['ip'] = domain_utils.resolve(subdomain['domain_name'])
 	domain_entity['subdomains'] = subdomains
-	domain_collection.update_one({'_id': domain['_id']}, {'$set': domain_entity})
+	domain_collection.update_one({'_id': domain_entity['_id']}, {'$set': domain_entity})
 	ip_collection = db.ip
 	return
 

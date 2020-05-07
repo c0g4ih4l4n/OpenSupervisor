@@ -19,9 +19,12 @@
 			<th>Domain Name</th>
 			<th>Organization</th>
 			<th>IP</th>
+			<th>Number Of Subdomains</th>
 			<th>Edit</th>
 			<th>Delete</th>
 			<th>Subdomain Enumeration</th>
+			<th>View</th>
+			<th>Status</th>
 		</tr>
 		{% for domain in domains %}
 		<tr>
@@ -29,12 +32,21 @@
 			<td>{{ domain['domain_name'] }}</td>
 			<td>{{ domain['org_name'] }}</td>
 			<td>{{ domain['ips'] }}</td>
+			<td>{{ domain['number_of_subdomains'] }}</td>
 			<td><a href="{{ url_for('edit_domain', domain_name=domain['domain_name']) }}">Edit</a></td>
 			<td><form action="{{ url_for('api.subdomain', domain_name=domain['domain_name']) }}" method="POST">
 				<input type="hidden" name="_method" value="DELETE">
 				<input type="submit" value="Delete">
 			</form></td>
+			{% if domain %}
 			<td><a href="{{ url_for('subdomain_enumeration', domain_name=domain['domain_name']) }}">Scan</a></td>
+
+			{% else %}
+			<td></td>
+			{% endif %}
+			<td><a href="{{ url_for('api.subdomain', domain_name=domain['domain_name']) }}">View</a></td>
+
+			<td>{{ domain['task_status'] }}</td>
 		</tr>
 		{% endfor %}
 	</table>

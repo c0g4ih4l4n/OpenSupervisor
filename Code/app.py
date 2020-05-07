@@ -1,20 +1,28 @@
 # from werkzeug import secure_filename
 
-import socket
 from flask import *
 from flask_restful import Resource, Api
 from flask_pymongo import PyMongo
 import pymongo
+
+import socket
 import urllib
 import json
 import db_utils
+import time
+
 from crontab import CronTab
 from bson import json_util
 import json
 import domain_utils
 from bson.json_util import dumps
+
+
 from flask_celery import make_celery
+from celery.result import AsyncResult
+
 import subdomain_enum_osint
+
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -24,8 +32,8 @@ app.secret_key = 'qweoi@#!ASDQWEJKLZXCJ'
 app.config['UPLOAD_FOLDER'] = 'upload/'
 app.config['MAX_CONTENT_PATH'] = 2048
 app.config['SQLALCHEMY_DATABASE_URI'] = ''
-app.config['CELERY_BROKER_URI'] = ''
-app.config['CELERY_BACKEND'] = ''
+app.config['CELERY_BROKER_URI'] = 'redis://localhost:6379/0'
+# app.config['CELERY_BACKEND'] = 'redis://localhost:6379/0'
 mongo_user = "admin_db"
 mongo_password = "long@2020"
 
@@ -42,10 +50,20 @@ api = Api(app)
 todos = {}
 celery = make_celery(app)
 
+
+
+
+
+
 class DomainListAPI(Resource):
 	def get(self):
 		headers = {'Content-Type': 'text/html'}
 		domains = dm_clt.find()
+		for domain in domains: 
+			if 'subdomain_enum_task_id' in domain:
+				domain['task_status'] = AsyncResult(domain['subdomain_enum_task_id']).status
+			else: 
+				domain['task_status'] = 'No Task'
 		domains_json = db_utils.cursor_to_json(domains)
 		return make_response(render_template('domain_dashboard.html', domains=domains_json), 200, headers)
 
@@ -60,12 +78,12 @@ class DomainListAPI(Resource):
 		dm_clt.insert(new_domain)
 		return redirect(url_for('target_dashboard'))
 
+
 class SubDomainAPI(Resource):
 	def get(self, domain_name):
 		headers = {}
-		domain_entity = dm_clt.find({'domain_name': domain_name})
-		subdomains = domain_entity['domain_name']
-		return make_response(render_template('domain_dashboard.html', domains=subdomains), 200, headers)
+		domain_entity = dm_clt.find_one({'domain_name': domain_name})
+		return make_response(render_template('subdomain_dashboard.html', domain=domain_entity), 200, headers)
 
 	def post(self, domain_name):
 		if request.form['_method'] == 'PUT':
@@ -79,6 +97,12 @@ class SubDomainAPI(Resource):
 		elif request.form['_method'] == 'DELETE':
 			dm_clt.remove({'domain_name': domain_name})
 			return redirect(url_for('target_dashboard'))
+
+
+
+
+
+
 
 api.add_resource(DomainListAPI, '/targets', endpoint = 'api.domains')
 api.add_resource(SubDomainAPI, '/targets/<string:domain_name>', endpoint = 'api.subdomain')
@@ -127,13 +151,17 @@ def edit_domain(domain_name):
 
 @app.route('/targets/<string:domain_name>/scan')
 def subdomain_enumeration(domain_name):
-	# push task to redis 
-	subdomain_enum_task.delay(domain_name)
+	# push task to redis
+	domain_entity = dm_clt.find_one({'domain_name': domain_name})
 
+	# get current task and check
+	task = subdomain_enum_worker.delay(domain_name)
+	domain_entity['subdomain_enum_task_id'] = task.task_id
+	dm_clt.update_one({'_id': domain_entity['_id']}, {'$set': domain_entity})
 	return redirect(url_for('api.domains'))
 
 @celery.task(name='app.subdomain_scan')
-def subdomain_enum_task(domain):
+def subdomain_enum_worker(domain):
 	subdomain_enum_osint.osint_update(domain)
 	return
 

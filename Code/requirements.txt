@@ -5,3 +5,4 @@ python-crontab
 dnspython
 requests
 celery-redbeat
+celery[redis]

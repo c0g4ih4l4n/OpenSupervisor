@@ -7,7 +7,7 @@ def make_celery(app):
     # create context tasks in celery
     celery = Celery(
         app.import_name,
-        broker=app.config['BROKER_URL']
+        broker=app.config['CELERY_BROKER_URI']
     )
     celery.conf.update(app.config)
     celery.config_from_object(celeryconfig)
