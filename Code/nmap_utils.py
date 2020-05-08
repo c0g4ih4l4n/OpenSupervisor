@@ -64,5 +64,4 @@ def parse_result(hosts, scan_data):
 	pass
 
 def check_host_alive():
-	
 	pass

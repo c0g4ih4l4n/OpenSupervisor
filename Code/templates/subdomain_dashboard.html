@@ -13,15 +13,26 @@
 			<th>ID</th>
 			<th>Subdomain Name</th>
 			<th>IP</th>
-			<th>Expired Time</th>
+			<th>Status</th>
+			<th>Delete</th>
+			<th>IP Scan</th>
 		</tr>
 		<tr>
 			{% set i = 1 %}
-			{% for domain in domain['subdomains'] %}
+			{% for subdomain in domain['subdomains'] %}
 			<td>{{ i }}</td>
-			<td>{{ domain['domain_name'] }}</td>
-			<td>{{ domain['ip'] }}</td>
-			<td>{{ domain['domain_name'] }}</td>
+			<td>{{ subdomain['domain_name'] }}</td>
+			<td>{{ subdomain['ip'] }}</td>
+			<td>Active</td>
+			<td>
+				<form action="{{ url_for('api.subdomain', domain_name=domain['domain_name']) }}" method="POST">
+					<input type="hidden" name="_method" value="DELETE">
+					<input type="hidden" name="domain_name" value="{{ subdomain['domain_name'] }}">
+					<input type="hidden" name="type" value="sub">
+					<input type="submit" value="Delete">
+				</form>
+			</td>
+			<td><a href="{{ url_for('ip_scan', ip=subdomain['ip']) }}"></a></td>
 			{% set i = i + 1 %}
 			{% endfor %}
 		</tr>

@@ -25,11 +25,12 @@
 			<th>Subdomain Enumeration</th>
 			<th>View</th>
 			<th>Status</th>
+			<th>Subdomain Scan Task ID</th>
 		</tr>
 		{% for domain in domains %}
 		<tr>
 			<td>{{ domain['_id'] }}</td>
-			<td>{{ domain['domain_name'] }}</td>
+			<td><a href="{{ url_for('api.subdomain', domain_name=domain['domain_name']) }}">{{ domain['domain_name'] }}</a></td>
 			<td>{{ domain['org_name'] }}</td>
 			<td>{{ domain['ips'] }}</td>
 			<td>{{ domain['number_of_subdomains'] }}</td>
@@ -47,6 +48,7 @@
 			<td><a href="{{ url_for('api.subdomain', domain_name=domain['domain_name']) }}">View</a></td>
 
 			<td>{{ domain['task_status'] }}</td>
+			<td>{{ domain['subdomain_enum_task_id'] }}</td>
 		</tr>
 		{% endfor %}
 	</table>

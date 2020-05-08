@@ -17,11 +17,13 @@ import json
 import domain_utils
 from bson.json_util import dumps
 
+import nmap_utils
+
 
 from flask_celery import make_celery
-from celery.result import AsyncResult
 
 import subdomain_enum_osint
+import subdomain_enum_bruteforce
 
 
 app = Flask(__name__)
@@ -59,11 +61,6 @@ class DomainListAPI(Resource):
 	def get(self):
 		headers = {'Content-Type': 'text/html'}
 		domains = dm_clt.find()
-		for domain in domains: 
-			if 'subdomain_enum_task_id' in domain:
-				domain['task_status'] = AsyncResult(domain['subdomain_enum_task_id']).status
-			else: 
-				domain['task_status'] = 'No Task'
 		domains_json = db_utils.cursor_to_json(domains)
 		return make_response(render_template('domain_dashboard.html', domains=domains_json), 200, headers)
 
@@ -95,8 +92,14 @@ class SubDomainAPI(Resource):
 			dm_clt.update_one({'_id' : domain['_id']}, {'$set': domain})
 			return redirect(url_for('target_dashboard'))
 		elif request.form['_method'] == 'DELETE':
-			dm_clt.remove({'domain_name': domain_name})
-			return redirect(url_for('target_dashboard'))
+			if request.form['type'] == 'sub':
+				domain_entity = dm_clt.find_one({'domain_name': domain_name})
+				domain_entity['subdomains'] = [x for x in domain_entity['subdomains'] if x['domain_name'] != request.form['domain_name']]
+				dm_clt.update_one({'_id' : domain_entity['_id']}, {'$set': domain_entity})
+				return redirect(url_for('api.subdomain', domain_name=domain_name))
+			else:
+				dm_clt.remove({'domain_name': domain_name})
+				return redirect(url_for('target_dashboard'))
 
 
 
@@ -160,14 +163,35 @@ def subdomain_enumeration(domain_name):
 	dm_clt.update_one({'_id': domain_entity['_id']}, {'$set': domain_entity})
 	return redirect(url_for('api.domains'))
 
+@app.route('/targets/<string:domain_name>/scan')
+def subdomain_bruteforce(domain_name):
+	# push task to redis
+	domain_entity = dm_clt.find_one({'domain_name': domain_name})
+
+	# get current task and check
+	task = subdomain_bruteforce_worker.delay(domain_name)
+	domain_entity['subdomain_enum_task_id'] = task.task_id
+	dm_clt.update_one({'_id': domain_entity['_id']}, {'$set': domain_entity})
+	return redirect(url_for('api.domains'))
+
 @celery.task(name='app.subdomain_scan')
 def subdomain_enum_worker(domain):
 	subdomain_enum_osint.osint_update(domain)
 	return
 
+@celery.task(name='app.subdomain_bruteforce')
+def subdomain_bruteforce_worker(domain):
+	subdomain_enum_bruteforce.osint_update(domain)
+	return
 
 
 
+
+
+@app.route('/ip_scan/<string:ip>', endpoint='ip_scan')
+def ip_scan(ip):
+
+	pass
 
 
 @app.route('/visualization/<string:domain>')
@@ -187,7 +211,7 @@ def ip_scan(domain):
 	return
 
 @app.route('/servicescan/<string:ip>')
-def servicescan(ip):
+def service_scan(ip):
 	# run scan with service scan
 
 	# detect web technology with whatweb
@@ -195,7 +219,7 @@ def servicescan(ip):
 	pass
 
 @app.route('/scriptscan/<string:ip>')
-def scriptscan(ip):
+def script_scan(ip):
 
 	pass
 

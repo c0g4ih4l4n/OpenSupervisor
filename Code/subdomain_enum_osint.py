@@ -87,6 +87,8 @@ def update_set_domains_file(filename, tool):
 		subdomains = [x.split()[1] for x in subdomains]
 	elif tool == 'subfinder' or tool == 'findomain':
 		subdomains = [x for x in subdomains]
+	else:
+		return
 	list_subdomains_osint.update(subdomains)
 	os.remove(filename)
 	return
@@ -110,7 +112,7 @@ def findomain(domain):
 	f_name = str(uuid.uuid4())
 	cmd = 'findomain -t {} -u {}'.format(domain, '/tmp/' + f_name)
 	os.system(cmd)
-	update_set_domains_file ('/tmp/' + f_name, 'findomain')
+	update_set_domains_file('/tmp/' + f_name, 'findomain')
 	return
 
 # osint with certspotter and crtsh query
@@ -160,23 +162,24 @@ def insert_domain_to_db(parent_domain, domain):
 	return
 
 def import_to_database(domain, subdomains, ips):
-	domain_entity = domain_collection.find({'domain_name': domain})
+	domain_entity = domain_collection.find_one({'domain_name': domain})
 	if domain_entity is None:
 		insert_domain_to_db(None, domain)
 
+	subdomains_record = []
 	for subdomain in subdomains:
-		subdomain['bruteforce'] = False
-		subdomain['ip'] = domain_utils.resolve(subdomain['domain_name'])
-	domain_entity['subdomains'] = subdomains
+		subdomain_entity = {}
+		subdomain_entity['domain_name'] = subdomain
+		subdomain_entity['bruteforce'] = False
+		subdomain_entity['ip'] = domain_utils.resolve(subdomain_entity['domain_name'])
+		subdomains_record.append(subdomain_entity)
+	domain_entity['subdomains'] = subdomains_record
 	domain_collection.update_one({'_id': domain_entity['_id']}, {'$set': domain_entity})
 	ip_collection = db.ip
 	return
 
 if __name__ == '__main__':
 	list_domain = get_list_domain()
-
-	# domains type set
-	list_subdomains_osint = set()
 
 	for domain in list_domain:
 		print ("[-] Running on {}.".format(domain))

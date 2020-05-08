@@ -6,3 +6,5 @@ dnspython
 requests
 celery-redbeat
 celery[redis]
+flower
+python-nmap
