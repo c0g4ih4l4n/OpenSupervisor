@@ -1,12 +1,12 @@
 import os
 from ipwhois import IPWhois
 
-def check_alive(ip)):
+def check_alive(ip):
     response = os.system("ping -c 1 " + ip)
     if response == 0:
-        return True
+        return 1
     else:
-        return False
+        return 0
 
 # write task schedule for check alive of all domain
 def task_schedule_check_alive(domain):

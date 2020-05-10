@@ -46,6 +46,7 @@ mongo = PyMongo(app)
 
 # client = MongoClient("mongodb://%s:%s@192.168.33.10:27017" % (mongo_user, mongo_password))  # host uri
 # db = client.ThesisDB  # Select the database
+db = mongo.db
 dm_clt = mongo.db.domain
 ip_clt = mongo.db.ip
 
@@ -73,11 +74,11 @@ class DomainListAPI(Resource):
 		wild_card = domain_utils.check_subdomain_wildcard(domain_name)
 		brute_force = True if request.form['brute_force'] == 1 else False
 		whois_data = domain_utils.whois(domain_name)
+
 		# Check alive ip
 		for ip in ip_list:
 			status = ip_utils.check_alive(ip)
 			# update to ip collection
-
 		
 		new_domain = {"domain_name": domain_name, "org_name": org_name, "ips": ip_list, 'wild_card': wild_card, "brute_force": brute_force, 'whois_data': whois_data}
 		dm_clt.insert(new_domain)
@@ -126,13 +127,21 @@ class IPListAPI(Resource):
 		wild_card = domain_utils.check_subdomain_wildcard(domain_name)
 		brute_force = True if request.form['brute_force'] == 1 else False
 		whois_data = domain_utils.whois(domain_name)
-		# Check alive ip
-		for ip in ip_list:
-			status = ip_utils.check_alive(ip)
-
 		
 		new_domain = {"domain_name": domain_name, "org_name": org_name, "ips": ip_list, 'wild_card': wild_card, "brute_force": brute_force, 'whois_data': whois_data}
 		dm_clt.insert(new_domain)
+		
+		# Check alive ip
+		for ip in ip_list:
+			status = ip_utils.check_alive(ip)
+			# update to db
+			
+			db.getCollection('ip').update(
+				{"ip": ip},
+				{'$setOnInsert': {'ip': ip, "status": status} },
+				upsert=True
+			)
+		# update status to db
 		return redirect(url_for('target_dashboard'))
 
 
