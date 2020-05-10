@@ -2,6 +2,8 @@ import socket
 import os
 import dns.resolver
 import tempfile
+import whois
+
 
 resolver_file = ''
 
@@ -66,3 +68,8 @@ def massdns_resolve_ip(domain_list, dictionary, resolver_file):
 		ips.update(res.split()[2])
 
 	return result,ips
+
+def whois(query, type='domain'):
+	data = whois.whois(query)
+
+	return data

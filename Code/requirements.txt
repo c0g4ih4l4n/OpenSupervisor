@@ -8,3 +8,5 @@ celery-redbeat
 celery[redis]
 flower
 python-nmap
+python-whois
+ipwhois

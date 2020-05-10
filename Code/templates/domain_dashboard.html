@@ -19,20 +19,22 @@
 			<th>Domain Name</th>
 			<th>Organization</th>
 			<th>IP</th>
+			<th>Status</th>
 			<th>Number Of Subdomains</th>
 			<th>Edit</th>
 			<th>Delete</th>
 			<th>Subdomain Enumeration</th>
 			<th>View</th>
-			<th>Status</th>
+			<th>Task Status</th>
 			<th>Subdomain Scan Task ID</th>
 		</tr>
 		{% for domain in domains %}
 		<tr>
-			<td>{{ domain['_id'] }}</td>
+			<td>{{ loop.index }}</td>
 			<td><a href="{{ url_for('api.subdomain', domain_name=domain['domain_name']) }}">{{ domain['domain_name'] }}</a></td>
 			<td>{{ domain['org_name'] }}</td>
 			<td>{{ domain['ips'] }}</td>
+			<td>{{ domain['status'] }}</td>
 			<td>{{ domain['number_of_subdomains'] }}</td>
 			<td><a href="{{ url_for('edit_domain', domain_name=domain['domain_name']) }}">Edit</a></td>
 			<td><form action="{{ url_for('api.subdomain', domain_name=domain['domain_name']) }}" method="POST">

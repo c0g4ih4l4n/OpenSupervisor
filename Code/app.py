@@ -10,6 +10,7 @@ import urllib
 import json
 import db_utils
 import time
+import ip_utils
 
 from crontab import CronTab
 from bson import json_util
@@ -46,6 +47,7 @@ mongo = PyMongo(app)
 # client = MongoClient("mongodb://%s:%s@192.168.33.10:27017" % (mongo_user, mongo_password))  # host uri
 # db = client.ThesisDB  # Select the database
 dm_clt = mongo.db.domain
+ip_clt = mongo.db.ip
 
 api = Api(app)
 
@@ -56,7 +58,7 @@ celery = make_celery(app)
 
 
 
-
+# Domain
 class DomainListAPI(Resource):
 	def get(self):
 		headers = {'Content-Type': 'text/html'}
@@ -70,8 +72,14 @@ class DomainListAPI(Resource):
 		ip_list = domain_utils.resolve(domain_name)
 		wild_card = domain_utils.check_subdomain_wildcard(domain_name)
 		brute_force = True if request.form['brute_force'] == 1 else False
+		whois_data = domain_utils.whois(domain_name)
+		# Check alive ip
+		for ip in ip_list:
+			status = ip_utils.check_alive(ip)
+			# update to ip collection
+
 		
-		new_domain = {"domain_name": domain_name, "org_name": org_name, "ips": ip_list, 'wild_card': wild_card, "brute_force": brute_force}
+		new_domain = {"domain_name": domain_name, "org_name": org_name, "ips": ip_list, 'wild_card': wild_card, "brute_force": brute_force, 'whois_data': whois_data}
 		dm_clt.insert(new_domain)
 		return redirect(url_for('target_dashboard'))
 
@@ -103,6 +111,29 @@ class SubDomainAPI(Resource):
 
 
 
+# IP
+class IPListAPI(Resource):
+	def get(self):
+		headers = {'Content-Type': 'text/html'}
+		domains = dm_clt.find()
+		domains_json = db_utils.cursor_to_json(domains)
+		return make_response(render_template('domain_dashboard.html', domains=domains_json), 200, headers)
+
+	def post(self):
+		domain_name = request.form['domain_name']
+		org_name = request.form['org_name'] if request.form['org_name'] is not None else ""
+		ip_list = domain_utils.resolve(domain_name)
+		wild_card = domain_utils.check_subdomain_wildcard(domain_name)
+		brute_force = True if request.form['brute_force'] == 1 else False
+		whois_data = domain_utils.whois(domain_name)
+		# Check alive ip
+		for ip in ip_list:
+			status = ip_utils.check_alive(ip)
+
+		
+		new_domain = {"domain_name": domain_name, "org_name": org_name, "ips": ip_list, 'wild_card': wild_card, "brute_force": brute_force, 'whois_data': whois_data}
+		dm_clt.insert(new_domain)
+		return redirect(url_for('target_dashboard'))
 
 
 
