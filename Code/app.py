@@ -25,6 +25,8 @@ from flask_celery import make_celery
 
 import subdomain_enum_osint
 import subdomain_enum_bruteforce
+import billiard as multiprocessing
+
 
 
 app = Flask(__name__)
@@ -75,10 +77,17 @@ class DomainListAPI(Resource):
 		brute_force = True if request.form['brute_force'] == 1 else False
 		whois_data = domain_utils.whois(domain_name)
 
-		# Check alive ip
+		# insert ip to db
 		for ip in ip_list:
 			status = ip_utils.check_alive(ip)
-			# update to ip collection
+			whois_data = ip_utils.whois(ip)
+			# update to db
+			
+			db.getCollection('ip').update(
+				{"ip": ip},
+				{'$setOnInsert': {'ip': ip, "status": status, 'whois': whois_data} },
+				upsert=True
+			)
 		
 		new_domain = {"domain_name": domain_name, "org_name": org_name, "ips": ip_list, 'wild_card': wild_card, "brute_force": brute_force, 'whois_data': whois_data}
 		dm_clt.insert(new_domain)
@@ -116,9 +125,9 @@ class SubDomainAPI(Resource):
 class IPListAPI(Resource):
 	def get(self):
 		headers = {'Content-Type': 'text/html'}
-		domains = dm_clt.find()
-		domains_json = db_utils.cursor_to_json(domains)
-		return make_response(render_template('domain_dashboard.html', domains=domains_json), 200, headers)
+		ips = ip_clt.find()
+		ips_json = ip_utils.cursor_to_json(ips)
+		return make_response(render_template('ip_dashboard.html', ips=ips_json), 200, headers)
 
 	def post(self):
 		domain_name = request.form['domain_name']
@@ -144,11 +153,37 @@ class IPListAPI(Resource):
 		# update status to db
 		return redirect(url_for('target_dashboard'))
 
+class IPAPI(Resource):
+	def get(self, domain_name):
+		headers = {}
+		domain_entity = dm_clt.find_one({'domain_name': domain_name})
+		return make_response(render_template('subdomain_dashboard.html', domain=domain_entity), 200, headers)
 
+	def post(self, domain_name):
+		if request.form['_method'] == 'PUT':
+			domain = dm_clt.find_one({'domain_name': domain_name})
+			domain['domain_name'] = request.form['domain_name']
+			domain['org_name'] = request.form['org_name']
+			domain['ips'] = domain_utils.resolve(request.form['domain_name'])
+			domain['wild_card'] = domain_utils.check_subdomain_wildcard(request.form['domain_name'])
+			dm_clt.update_one({'_id' : domain['_id']}, {'$set': domain})
+			return redirect(url_for('target_dashboard'))
+		elif request.form['_method'] == 'DELETE':
+			if request.form['type'] == 'sub':
+				domain_entity = dm_clt.find_one({'domain_name': domain_name})
+				domain_entity['subdomains'] = [x for x in domain_entity['subdomains'] if x['domain_name'] != request.form['domain_name']]
+				dm_clt.update_one({'_id' : domain_entity['_id']}, {'$set': domain_entity})
+				return redirect(url_for('api.subdomain', domain_name=domain_name))
+			else:
+				dm_clt.remove({'domain_name': domain_name})
+				return redirect(url_for('target_dashboard'))
 
 
 api.add_resource(DomainListAPI, '/targets', endpoint = 'api.domains')
 api.add_resource(SubDomainAPI, '/targets/<string:domain_name>', endpoint = 'api.subdomain')
+
+api.add_resource(IPListAPI, '/ips', endpoint = 'api.ips')
+api.add_resource(IPAPI, '/ips/<string:ip>', endpoint = 'api.ip')
 
 @app.route('/api/domains/list')
 def domain_list():
@@ -203,7 +238,7 @@ def subdomain_enumeration(domain_name):
 	dm_clt.update_one({'_id': domain_entity['_id']}, {'$set': domain_entity})
 	return redirect(url_for('api.domains'))
 
-@app.route('/targets/<string:domain_name>/scan')
+@app.route('/targets/<string:domain_name>/brute_force_scan')
 def subdomain_bruteforce(domain_name):
 	# push task to redis
 	domain_entity = dm_clt.find_one({'domain_name': domain_name})
@@ -228,10 +263,38 @@ def subdomain_bruteforce_worker(domain):
 
 
 
-@app.route('/ip_scan/<string:ip>', endpoint='ip_scan')
-def ip_scan(ip):
 
-	pass
+
+
+
+
+@app.route('/ips/create')
+def create_ip():
+	return render_template('ip_create.html')
+
+@app.route('/ips/<string:ip>/edit')
+def edit_ip():
+	return
+
+
+@app.route('/ips/<string:ip>/scan')
+def ip_scan(ip):
+	ip_scan_worker.delay(ip)
+	return redirect(url_for('api.ips'))
+
+@celery.task(name='app.ip_scan')
+def ip_scan_worker(ip):
+	print ('Start regular scan on {}'.format(ip))
+	nmap_utils.regular_scan_port(ip)
+	return
+
+
+
+
+
+
+
+
 
 
 @app.route('/visualization/<string:domain>')
@@ -240,9 +303,9 @@ def visualization(domain):
 	pass
 
 @app.route('/postscan/<string:ip>')
-def portscan(ip):
+def port_scan(ip):
 	# scan with 2 modules
-	portscan(ip)
+	# portscan(ip)
 	pass
 
 @celery.task(name='app.ip_scan')

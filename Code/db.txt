@@ -1,2 +1,0 @@
-create unique index for ip
-    db.ip.createIndex({'ip': 1}, { unique: true})

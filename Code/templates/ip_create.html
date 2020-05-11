@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Subdomain Dashboard</title>
+</head>
+<body>
+	<h1>IP Dashboard</h1>
+	<h3>Create new ip targets</h3>
+	<form action="{{ url_for('api.ips') }}" method="POST">
+		<label>IP</label>
+		<input type="text" name="ip">
+		<br>
+		<label>Organization Name</label>
+		<input type="text" name="org_name">
+		<br>
+		<label for="bruteforce-option">Brute Force</label>
+		<br>
+		<label for="">Yes</label>
+		<input type="radio" name="brute_force" value="1">
+		<label for="">No</label>
+		<input type="radio" name="brute_force" value="0">
+		<br>
+		<input type="submit" value="Create">
+	</form>
+</body>
+</html>

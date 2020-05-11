@@ -9,6 +9,7 @@ import uuid
 import tempfile
 import domain_utils
 import re
+import ip_utils
 
 # for debug
 from pprint import pprint
@@ -30,6 +31,7 @@ client = MongoClient('mongodb://%s:%s@192.168.33.10/ThesisDB' % (mongo_user, url
 
 db = client.ThesisDB
 domain_collection = db.domain
+ip_clt = db.ip
 list_subdomains_osint = set()
 
 
@@ -172,10 +174,23 @@ def import_to_database(domain, subdomains, ips):
 		subdomain_entity['domain_name'] = subdomain
 		subdomain_entity['bruteforce'] = False
 		subdomain_entity['ip'] = domain_utils.resolve(subdomain_entity['domain_name'])
+
+		print ('Update IP...')
+		for ip in subdomain_entity['ip']:
+			status = ip_utils.check_alive(ip)
+			# update to db
+			whois_data = ip_utils.whois(ip)
+		
+			ip_clt.update(
+				{"ip": ip},
+				{'$setOnInsert': {'ip': ip, 'status': status, 'whois': whois_data} },
+				upsert=True
+			)
 		subdomains_record.append(subdomain_entity)
+
 	domain_entity['subdomains'] = subdomains_record
 	domain_collection.update_one({'_id': domain_entity['_id']}, {'$set': domain_entity})
-	ip_collection = db.ip
+
 	return
 
 if __name__ == '__main__':

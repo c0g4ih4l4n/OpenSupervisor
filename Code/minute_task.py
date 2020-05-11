@@ -6,9 +6,13 @@ def check_host():
     list_ip = app.ip_clt.find({})
 
     for ip in list_ip:
-        status = ip_utils.check_host(ip)
+        status = ip_utils.check_alive(ip)
         ip['status'] = status
-        app.ip_clt.update_one({'_id': domain['_id']}, {'$set': domain})
+
+        app.db.getCollection('ip').update(
+            {"ip": ip},
+            {'$set': {'status': status} }
+        )
     pass
 
 if __name__ == '__main__':

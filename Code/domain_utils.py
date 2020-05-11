@@ -69,7 +69,7 @@ def massdns_resolve_ip(domain_list, dictionary, resolver_file):
 
 	return result,ips
 
-def whois(query, type='domain'):
+def whois_query(query, type='domain'):
 	data = whois.whois(query)
 
 	return data
