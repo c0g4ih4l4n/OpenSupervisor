@@ -5,6 +5,13 @@
 </head>
 <body>
 	<h1>Dashboard</h1>
+	<div class="vertical-menu">
+		<a href="#" class="active">Home</a>
+		<a href="{{ url_for('domain_dashboard') }}">Dashboard</a>
+		<a href="{{ url_for('api.ips') }}">IP Dashboard</a>
+		<a href="{{ url_for('google_hacking_dashboard') }}">Google Hacking Queries</a>
+		<a href="{{ url_for('vuln_db_dashboard') }}">Vuln Database</a>
+	</div>
 	<h3>Create new domain</h3>
 	<form action="{{ url_for('api.domains') }}" method="POST">
 		<label>Domain</label>

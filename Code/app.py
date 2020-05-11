@@ -292,6 +292,24 @@ def ip_scan_worker(ip):
 
 
 
+@app.route('/vuln-database')
+def vuln_db_dashboard():
+	return render_template('vuln-database.html')
+
+
+
+@app.route('/google_hacking_dashboard')
+def google_hacking_dashboard():
+	return render_template('google_hacking_dashboard.html')
+
+
+
+
+
+
+
+
+
 
 
 

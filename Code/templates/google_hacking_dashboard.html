@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Google Hacking Queries</title>
+	<meta http-equiv="refresh" content="5"/>
+</head>
+<body>
+	<h1>Dashboard</h1>
+	<div class="vertical-menu">
+		<a href="#" class="active">Home</a>
+		<a href="{{ url_for('domain_dashboard') }}">Dashboard</a>
+		<a href="{{ url_for('api.ips') }}">IP Dashboard</a>
+		<a href="{{ url_for('google_hacking_dashboard') }}">Google Hacking Queries</a>
+		<a href="{{ url_for('vuln_db_dashboard') }}">Vuln Database</a>
+	</div>
+	List IPs:
+	<table border="1px">
+		<tr>
+			<th>ID</th>
+            <th>Service</th>
+            <th>Vuln</th>
+            <th>Script</th>
+            <th>Detail</th>
+            <th>Mitigation</th>
+            <th>Avaiable Exploit</th>
+		</tr>
+		<tr>
+            <td>1</td>
+            <td>SSH</td>
+            <td>CVE-2012-5975</td>
+            <td>cve.py</td>
+            <td>USERAUTH CHANGE REQUEST</td>
+            <td>Update to latest version of Software</td>
+            <td>Yes</td>
+		</tr>
+	</table>
+	<a href="{{ url_for('create_ip') }}">Create new one</a>
+
+	<script type="text/javascript">
+
+	</script>
+</body>
+</html>
