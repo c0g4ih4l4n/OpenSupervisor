@@ -11,6 +11,7 @@ import json
 import db_utils
 import time
 import ip_utils
+import nmap
 
 from crontab import CronTab
 from bson import json_util
@@ -340,10 +341,23 @@ def script_scan(ip):
 	script_scan_worker.delay(ip)
 	return redirect(request.referrer)
 
+
+@app.route('/script_scan/<string:ip>')
+def category_script_scan(ip):
+	category_script_scan_worker.delay(ip)
+	return redirect(request.referrer)
+
+
 @celery.task(name='app.default_script_scan')
 def script_scan_worker(ip):
 	nmap_utils.default_script_scan(ip)
 	return
+
+@celery.task(name='app.default_script_scan')
+def category_script_scan_worker(ip):
+	nmap_utils.default_script_scan(ip)
+	return
+
 
 @app.route('/brute-force-credentials/<string:domain>')
 def brute_credentials(domain):
@@ -351,9 +365,12 @@ def brute_credentials(domain):
 	pass
 
 
-@app.route('/test', methods=['POST'])
+@app.route('/test', methods=['POST', 'GET'])
 def test():
-	return 'Running.'
+	host = '128.199.152.172'
+	ip_entity = ip_clt.find_one({'ip': host})
+	return str(ip_entity)
+	# return 'Running.'
 
 
 if __name__ == '__main__':

@@ -41,7 +41,7 @@
 			<td>Down</td>
 			{% endif %}
 			<td>{{ ip['hostnames'] }}</td>
-			{% if 'scan' in ip %}
+			{% if 'scan' in ip and ip['ip'] in ip['scan'] %}
 			<td>{{ ip['scan'][ip['ip']]['tcp'] }}</td>
 			{% else %}
 			<td>No Result</td>

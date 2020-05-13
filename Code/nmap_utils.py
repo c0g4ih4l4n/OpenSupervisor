@@ -29,41 +29,126 @@ ip_clt = client.ip
 scan_type_list = ['auth', 'broadcast', 'brute', 'default', 'discovery', 'dos', 'exploit', 'external', 'fuzzer', 'intrusive', 'malware', 'safe', 'version', 'vuln']
 nm = nmap.PortScannerAsync()
 
-def category_scan(ip, list_cat):
-	args = '--script ' + ','.join(list_cat)
-	nm.scan(ip, arguments=args, callback=category_scan_cb, sudo=False)
-	return
 
-def default_script_scan(ip):
-	# get all port
+def get_port(ip):
 	ip_entity = app.ip_clt.find_one({'ip': ip})
 
 	if 'scan' in ip_entity:
-		ports = ip_entity['scan'].keys()
-	args = '-p' + ','.join(ports) + ' --script default -T4'
-	print ('Argument: {}'.format(args))
-	nm.scan(ip, arguments=args, callback=default_script_cb, sudo=False)
+		ports = ip_entity['scan'][ip]['tcp'].keys()
+
+		return ports
+	return []
+
+def default_script_scan(ip):
+	# get all port
+	ports = get_port(ip)
+	args = '-p{} --script default -T4'.format(','.join(ports))
+	print ("Arguments: {}".format(args))
+	nm.scan(ip, arguments=args, callback=script_cb, sudo=False)
+	update_status_scan(ip, ['default'])
 	return
 
-def default_script_cb(host, scan_data):
-	ip_entity = app.ip_clt.find_one({'ip': host})
-	# scan_data = convert_key_to_string(host, scan_data)
-	print ('Host: {}, Scan Data: {}'.format(host, scan_data))
-	app.ip_clt.update({'_id': ip_entity['_id']}, 
-	{'$set': scan_data
-		# 'tcp_port': json.dumps(scan_data['scan'][host]['tcp']), 
-		# 'hostnames': json.dumps(scan_data['scan'][host]['hostnames'][0]['name']),
-		# 'state': json.dumps(scan_data['scan'][host]['status']['state'])
-		# 'scaninfo': scan_data['nmap']['scaninfo']
-	})
+
+
+def category_script_scan(ip, scan_type_list):
+	ports = get_port(ip)
+
+	if len(scan_type_list) == 0:
+		scan_type_list = ['default']
+
+	if len(ports) != 0:
+		args = '-p{} --script {} -T4'.format(','.join(ports), ','.join(scan_type_list))
+	else:
+		args = '--script {} -T4'.format(','.join(scan_type_list))
+	nm.scan(ip, arguments=args, callback=script_cb, sudo=False)
+	# update status of category scan
+
+	return
+
+def script_cb(host, scan_data):
+	if len(scan_data) == 0: 
+		return
+	
+	if 'error' in scan_data['nmap']['scaninfo']:
+		return
+	update_db(host, scan_data)
 	return
 
 def category_scan_cb(host, scan_data):
 	pass
 
+
+def update_status_scan(ip, scan_type_list):
+	ip_entity = app.ip_clt.find_one({'ip': ip})
+	if 'status_scan' not in ip_entity:
+		ip_entity['status_scan'] = {}
+
+	for st in scan_type_list:
+		ip_entity['status_scan'][st] = 1
+	
+	app.ip_clt.update({'_id': ip_entity['_id']}, {'$set': {'status_scan': ip_entity['status_scan']}})
+
+	return
+
+# some misunderstanding this situation
+def update_db(host, scan_data):
+	ip_entity = app.ip_clt.find_one({'ip': host})
+	scan_data = convert_key_to_string(host, scan_data)
+
+	old_port_data = ip_entity['scan'][host]['tcp']
+	new_port_data = scan_data['scan'][host]['tcp']
+	print ("NEW PORT DATA: {}".format(new_port_data))
+	for port, service in new_port_data.items():
+		print ("Port: {}, Service: {}".format(port, service))
+		if port not in old_port_data.keys():
+			continue
+
+		if 'script' in service and 'script' in old_port_data[port]:
+			new_port_data[port]['script'] = {**old_port_data[port]['script'], **new_port_data[port]['script']}
+		elif 'script' in old_port_data[port]:
+			service['script'] = old_port_data[port]['script']
+
+	# if old scan have a port new scan doesn't have
+	# fix with scan type (all, regular, script scan, scan type)
+	for port, service in old_port_data.items():
+		if port not in new_port_data.keys():
+			new_port_data[port] = service
+
+	# host scripts
+	if 'hostscript' in ip_entity['scan'] and 'hostscript' not in scan_data['scan']:
+		scan_data['scan']['hostscript'] = ip_entity['scan']['hostscript']
+
+	if 'hostscript' in ip_entity['scan'] and 'hostscript' in scan_data['scan']:
+		old_host_script = ip_entity['scan']['hostscript']
+		new_host_script = scan_data['scan']['hostscript']
+
+		new_host_script = {**old_host_script, **new_host_script}
+
+		# update host script 
+		# Pending
+		# for script in old_host_script:
+		# 	if script['id'] not in new_host_script:
+		# 		pass
+
+	scan_data['scan'][host]['tcp'] = new_port_data
+
+	# loop through scan_data and update state port and script
+
+	if len(scan_data) != 0:
+		app.ip_clt.update({'_id': ip_entity['_id']}, 
+		{'$set': scan_data
+			# 'tcp_port': json.dumps(scan_data['scan'][host]['tcp']), 
+			# 'hostnames': json.dumps(scan_data['scan'][host]['hostnames'][0]['name']),
+			# 'state': json.dumps(scan_data['scan'][host]['status']['state'])
+			# 'scaninfo': scan_data['nmap']['scaninfo']
+		})
+
+	return
+
+
 def convert_key_to_string(host, nmap_result):
 	# scan -> host -> tcp
-	print (nmap_result['scan'][host]['tcp'])
+	print (nmap_result)
 	new_d = {str(key): value for key, value in nmap_result['scan'][host]['tcp'].items()}
 	nmap_result['scan'][host]['tcp'] = new_d
 	return nmap_result
@@ -75,16 +160,7 @@ def regular_scan_port(ip):
 def regular_port_cb_result(host, scan_data):
 	# update to DB
 	print ('Host: {}, Scan data: {}'.format(host, scan_data))
-
-	ip_entity = app.ip_clt.find_one({'ip': host})
-	scan_data = convert_key_to_string(host, scan_data)
-	app.ip_clt.update({'_id': ip_entity['_id']}, 
-	{'$set': scan_data
-		# 'tcp_port': json.dumps(scan_data['scan'][host]['tcp']), 
-		# 'hostnames': json.dumps(scan_data['scan'][host]['hostnames'][0]['name']),
-		# 'state': json.dumps(scan_data['scan'][host]['status']['state'])
-		# 'scaninfo': scan_data['nmap']['scaninfo']
-	})
+	update_db(host, scan_data)
 	return 'Success'
 
 def tor_network_scan_port(ip):
