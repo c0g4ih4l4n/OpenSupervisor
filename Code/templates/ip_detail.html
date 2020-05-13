@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Detail for {{ ip['ip'] }}</title>
+	<!-- <meta http-equiv="refresh" content="5"/> -->
+</head>
+<body>
+    <h1>IP Detail</h1>
+    <h3>For {{ ip['ip'] }}</h3>
+	<div class="vertical-menu">
+		<a href="#" class="active">Home</a>
+		<a href="{{ url_for('domain_dashboard') }}">Dashboard</a>
+		<a href="{{ url_for('api.ips') }}">IP Dashboard</a>
+		<a href="{{ url_for('google_hacking_dashboard') }}">Google Hacking Queries</a>
+		<a href="{{ url_for('vuln_db_dashboard') }}">Vuln Database</a>
+    </div>
+    IP information:
+    <div>
+        IP: {{ ip['ip'] }}
+        <br>
+        Whois data: 
+        <br>
+        Status: {{ ip['status'] }}
+        <br>
+        Hostname: {{ ip['scan'][ip['ip']]['hostnames'][0]['name'] }}
+        <br>
+        OS: Windows or Linux
+    </div>
+    <br>
+
+    <div>
+        Scan scripts:
+        <table border="1px">
+            <tr>
+                <th>ID</th>
+                <th>Pick</th>
+                <th>Scan type</th>
+                <th>Task id</th>
+                <th>Task Status</th>
+            </tr>
+            <form action="/test" method="POST">
+                {% for scan_type in scan_type_list %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td><input type="checkbox" value="{{ scan_type }}" name="scan_type[]"></td>
+                    <td>{{ scan_type }}</td>
+                    <td></td>
+                    <td>Scan</td>
+                </tr>
+                {% endfor %}
+                
+        </table>
+                <input type="submit" value="Scan">
+            </form>
+    </div>
+
+
+    <!-- nmap result -->
+	<h3>List Ports:</h3>
+	<table border="1px">
+		<tr>
+			<th>ID</th>
+            <th>Port</th>
+            <th>Type</th>
+            <th>State</th>
+            <th>Service</th>
+            <th>Product Version</th>
+            <th>Reason</th>
+			<th>Edit</th>
+			<th>Delete</th>
+            <th>View</th>
+            <th>Default Scan</th>
+            <th>Script Result</th>
+        </tr>
+		{% for port, service in ip['scan'][ip['ip']]['tcp'].items() %}
+		<tr>
+			<td>{{ loop.index }}</td>
+			<td><a href="">{{ port }}</a></td>
+			<td>TCP</td>
+            <td>{{ service['state'] }}</td>
+			<td>{{ service['name'] }}</td>
+			<td>{{ service['product'] + ' ' + service['version'] }}</td>
+			<td>{{ service['reason'] }}</td>
+			<td><a href="{{ url_for('test') }}">Edit</a></td>
+			<td><form action="{{ url_for('test') }}" method="POST">
+				<input type="hidden" name="_method" value="DELETE">
+				<input type="submit" value="Delete">
+			</form></td>
+			<!-- <td><a href="{{ url_for('test') }}">Scan</a></td> -->
+
+            <td><a href="{{ url_for('test') }}">View</a></td>
+            <td><a href="{{ url_for('test') }}">Scan</a></td>
+            <td>{{ service['script'] }}</td>
+		</tr>
+		{% endfor %}
+    </table>
+    <a href="{{ url_for('script_scan', ip=ip['ip']) }}">Default Script Scan</a>
+    <br>
+	<a href="{{ url_for('create_ip') }}">Create new one</a>
+
+	<script type="text/javascript">
+
+	</script>
+</body>
+</html>

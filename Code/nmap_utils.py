@@ -26,11 +26,50 @@ ip_clt = client.ip
 # Scan cve with that technology
 # tor scan with nmap using proxychain, tor, nmap
 
-categories = ['auth', 'broadcast', 'brute', 'default', 'discovery', 'dos', 'exploit', 'external', 'fuzzer', 'intrusive', 'malware', 'safe', 'version', 'vuln']
+scan_type_list = ['auth', 'broadcast', 'brute', 'default', 'discovery', 'dos', 'exploit', 'external', 'fuzzer', 'intrusive', 'malware', 'safe', 'version', 'vuln']
+nm = nmap.PortScannerAsync()
+
+def category_scan(ip, list_cat):
+	args = '--script ' + ','.join(list_cat)
+	nm.scan(ip, arguments=args, callback=category_scan_cb, sudo=False)
+	return
+
+def default_script_scan(ip):
+	# get all port
+	ip_entity = app.ip_clt.find_one({'ip': ip})
+
+	if 'scan' in ip_entity:
+		ports = ip_entity['scan'].keys()
+	args = '-p' + ','.join(ports) + ' --script default -T4'
+	print ('Argument: {}'.format(args))
+	nm.scan(ip, arguments=args, callback=default_script_cb, sudo=False)
+	return
+
+def default_script_cb(host, scan_data):
+	ip_entity = app.ip_clt.find_one({'ip': host})
+	# scan_data = convert_key_to_string(host, scan_data)
+	print ('Host: {}, Scan Data: {}'.format(host, scan_data))
+	app.ip_clt.update({'_id': ip_entity['_id']}, 
+	{'$set': scan_data
+		# 'tcp_port': json.dumps(scan_data['scan'][host]['tcp']), 
+		# 'hostnames': json.dumps(scan_data['scan'][host]['hostnames'][0]['name']),
+		# 'state': json.dumps(scan_data['scan'][host]['status']['state'])
+		# 'scaninfo': scan_data['nmap']['scaninfo']
+	})
+	return
+
+def category_scan_cb(host, scan_data):
+	pass
+
+def convert_key_to_string(host, nmap_result):
+	# scan -> host -> tcp
+	print (nmap_result['scan'][host]['tcp'])
+	new_d = {str(key): value for key, value in nmap_result['scan'][host]['tcp'].items()}
+	nmap_result['scan'][host]['tcp'] = new_d
+	return nmap_result
 
 def regular_scan_port(ip):
 	# Scan port
-	nm = nmap.PortScannerAsync()
 	nm.scan(ip, callback=regular_port_cb_result, sudo=False)
 
 def regular_port_cb_result(host, scan_data):
@@ -38,14 +77,13 @@ def regular_port_cb_result(host, scan_data):
 	print ('Host: {}, Scan data: {}'.format(host, scan_data))
 
 	ip_entity = app.ip_clt.find_one({'ip': host})
+	scan_data = convert_key_to_string(host, scan_data)
 	app.ip_clt.update({'_id': ip_entity['_id']}, 
-	{'$set': {
-		'nmap': json.dumps(scan_data), 
-		'tcp_port': json.dumps(scan_data['scan'][host]['tcp']), 
-		'hostnames': json.dumps(scan_data['scan'][host]['hostnames'][0]['name']),
-		'state': json.dumps(scan_data['scan'][host]['status']['state'])
+	{'$set': scan_data
+		# 'tcp_port': json.dumps(scan_data['scan'][host]['tcp']), 
+		# 'hostnames': json.dumps(scan_data['scan'][host]['hostnames'][0]['name']),
+		# 'state': json.dumps(scan_data['scan'][host]['status']['state'])
 		# 'scaninfo': scan_data['nmap']['scaninfo']
-		}
 	})
 	return 'Success'
 

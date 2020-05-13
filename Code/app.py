@@ -154,10 +154,11 @@ class IPListAPI(Resource):
 		return redirect(url_for('target_dashboard'))
 
 class IPAPI(Resource):
-	def get(self, domain_name):
+	def get(self, ip):
 		headers = {}
-		domain_entity = dm_clt.find_one({'domain_name': domain_name})
-		return make_response(render_template('subdomain_dashboard.html', domain=domain_entity), 200, headers)
+		ip_entity = ip_clt.find_one({'ip': ip})
+		scan_type_list = ['auth', 'broadcast', 'brute', 'default', 'discovery', 'dos', 'exploit', 'external', 'fuzzer', 'intrusive', 'malware', 'safe', 'version', 'vuln']
+		return make_response(render_template('ip_detail.html', ip=ip_entity, scan_type_list=scan_type_list), 200, headers)
 
 	def post(self, domain_name):
 		if request.form['_method'] == 'PUT':
@@ -326,11 +327,6 @@ def port_scan(ip):
 	# portscan(ip)
 	pass
 
-@celery.task(name='app.ip_scan')
-def ip_scan(domain):
-	subdomain_enum_osint.osint_update(domain)
-	return
-
 @app.route('/servicescan/<string:ip>')
 def service_scan(ip):
 	# run scan with service scan
@@ -339,15 +335,26 @@ def service_scan(ip):
 	# use wappanalyzer
 	pass
 
-@app.route('/scriptscan/<string:ip>')
+@app.route('/script_scan/<string:ip>')
 def script_scan(ip):
+	script_scan_worker.delay(ip)
+	return redirect(request.referrer)
 
-	pass
+@celery.task(name='app.default_script_scan')
+def script_scan_worker(ip):
+	nmap_utils.default_script_scan(ip)
+	return
 
 @app.route('/brute-force-credentials/<string:domain>')
 def brute_credentials(domain):
 	# brute force with brutespray
 	pass
+
+
+@app.route('/test', methods=['POST'])
+def test():
+	return 'Running.'
+
 
 if __name__ == '__main__':
 	app.debug = True

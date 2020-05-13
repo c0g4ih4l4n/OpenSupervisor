@@ -25,3 +25,12 @@ db.createUser({
 
 create unique index for ip
     db.ip.createIndex({'ip': 1}, { unique: true})
+
+command run: 
+main app: 
+  python app.py
+
+worker: 
+  celery -A app.celery worker --loglevel=info -P threads
+
+ip['nmap']['scan'][ip['ip']]['tcp']
