@@ -39,6 +39,10 @@ def get_port(ip):
 		return ports
 	return []
 
+def vuln_scan(ip):
+	category_script_scan(ip, ['vuln'])
+	return
+
 def default_script_scan(ip):
 	# get all port
 	ports = get_port(ip)
@@ -48,7 +52,11 @@ def default_script_scan(ip):
 	update_status_scan(ip, ['default'])
 	return
 
+def get_xml_result(ip):
+	
+	args = '-oX '
 
+	return
 
 def category_script_scan(ip, scan_type_list):
 	ports = get_port(ip)
@@ -60,9 +68,12 @@ def category_script_scan(ip, scan_type_list):
 		args = '-p{} --script {} -T4'.format(','.join(ports), ','.join(scan_type_list))
 	else:
 		args = '--script {} -T4'.format(','.join(scan_type_list))
+
+	print ('Argument: {}'.format(args))
 	nm.scan(ip, arguments=args, callback=script_cb, sudo=False)
 	# update status of category scan
-
+	update_status_scan(ip, scan_type_list)
+	print ('Scan Done!')
 	return
 
 def script_cb(host, scan_data):
@@ -107,6 +118,10 @@ def update_db(host, scan_data):
 			new_port_data[port]['script'] = {**old_port_data[port]['script'], **new_port_data[port]['script']}
 		elif 'script' in old_port_data[port]:
 			service['script'] = old_port_data[port]['script']
+
+		if old_port_data[port]['product'] != '':
+			service['product'] = old_port_data[port]['product']
+			service['version'] = old_port_data[port]['version']
 
 	# if old scan have a port new scan doesn't have
 	# fix with scan type (all, regular, script scan, scan type)
