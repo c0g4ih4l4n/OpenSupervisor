@@ -34,3 +34,9 @@ worker:
   celery -A app.celery worker --loglevel=info -P threads
 
 ip['nmap']['scan'][ip['ip']]['tcp']
+
+vuln db:
+  create vuln DB with fields 
+    (id, service, vuln, product, version, details, mitigation method)
+
+https://hunter.io/

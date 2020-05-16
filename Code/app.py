@@ -351,7 +351,7 @@ def category_script_scan(ip):
 @celery.task(name='app.default_script_scan')
 def script_scan_worker(ip):
 	nmap_utils.default_script_scan(ip)
-	return
+	return redirect(request.referrer)
 
 @celery.task(name='app.default_script_scan')
 def category_script_scan_worker(ip):
@@ -359,17 +359,41 @@ def category_script_scan_worker(ip):
 	return
 
 
-@app.route('/brute-force-credentials/<string:domain>')
+@app.route('/custom_script_scan/<string:ip>', methods=['POST'])
+def custom_script_scan(ip):
+	scan_type_list = request.form.getlist('scan_type[]')
+	custom_script_scan_worker.delay(ip, scan_type_list)
+	return redirect(request.referrer)
+
+@celery.task(name='app.custom_script_scan')
+def custom_script_scan_worker(ip, scan_type_list):
+	print ("Running on ip: {}, Category: {}".format(ip, ','.join(scan_type_list)))
+	nmap_utils.category_script_scan(ip, scan_type_list)
+	return
+
+@app.route('/vuln_scan/<string:ip>')
+def vuln_scan(ip):
+	vuln_scan_woker.delay(ip)
+	return
+
+@celery.task(name='app.vuln_scan')
+def vuln_scan_woker(ip):
+	print ("Start vuln script scan on {}.".format(ip))
+	nmap_utils.vuln_script_scan(ip)
+	return
+
+@app.route('/brute_force_credentials/<string:domain>')
 def brute_credentials(domain):
 	# brute force with brutespray
+
+	# get nmap result
+	
 	pass
 
 
 @app.route('/test', methods=['POST', 'GET'])
 def test():
-	host = '128.199.152.172'
-	ip_entity = ip_clt.find_one({'ip': host})
-	return str(ip_entity)
+	return str(request.form.getlist('scan_type[]'))
 	# return 'Running.'
 
 

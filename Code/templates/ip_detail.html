@@ -2,7 +2,12 @@
 <html>
 <head>
 	<title>Detail for {{ ip['ip'] }}</title>
-	<!-- <meta http-equiv="refresh" content="5"/> -->
+    <meta http-equiv="refresh" content="5"/>
+    <style>
+        tr.disabled {
+            background-color: grey;
+        }
+    </style>
 </head>
 <body>
     <h1>IP Detail</h1>
@@ -18,7 +23,7 @@
     <div>
         IP: {{ ip['ip'] }}
         <br>
-        Whois data: 
+        Whois data: {{ ip['whois'] }}
         <br>
         Status: {{ ip['status'] }}
         <br>
@@ -57,14 +62,18 @@
                 <th>Task ID</th>
                 <th>Task Status</th>
             </tr>
-            <form action="/test" method="POST">
+            <form action="{{ url_for('custom_script_scan', ip=ip['ip']) }}" method="POST">
                 {% for scan_type in scan_type_list %}
-                <tr>
+                <tr {% if 'status_scan' in ip and ip["status_scan"][scan_type] == 1 %} class="disabled" {% endif %}>
                     <td>{{ loop.index }}</td>
-                    <td><input type="checkbox" value="{{ scan_type }}" name="scan_type[]"></td>
+                    <td> 
+                        <input type="checkbox" value="{{ scan_type }}" name="scan_type[]">
+                    </td>
                     <td>{{ scan_type }}</td>
                     <td></td>
-                    <td>{{ ip['status'][scan_type] }}</td>
+                    {% if 'status_scan' in ip and ip['status_scan'][scan_type] == 1 %}
+                    <td>Check</td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
                 
@@ -88,7 +97,7 @@
 			<th>Edit</th>
 			<th>Delete</th>
             <th>View</th>
-            <th>Default Scan</th>
+            <th>Vuln Scan</th>
             <th>Script Result</th>
         </tr>
         {% if 'scan' in ip and ip['ip'] in ip['scan'] %}
@@ -109,7 +118,7 @@
 			<!-- <td><a href="{{ url_for('test') }}">Scan</a></td> -->
 
             <td><a href="{{ url_for('test') }}">View</a></td>
-            <td><a href="{{ url_for('test') }}">Scan</a></td>
+            <td><a href="{{ url_for('test') }}">Vuln Scan</a></td>
             <td>{{ service['script'] }}</td>
 		</tr>
         {% endfor %}
