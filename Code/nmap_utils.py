@@ -39,6 +39,8 @@ def get_port(ip):
 		return ports
 	return []
 
+
+# script scan
 def default_script_scan(ip):
 	# get all port
 	ports = get_port(ip)
@@ -153,6 +155,9 @@ def convert_key_to_string(host, nmap_result):
 	nmap_result['scan'][host]['tcp'] = new_d
 	return nmap_result
 
+
+
+# port scan
 def regular_scan_port(ip):
 	# Scan port
 	nm.scan(ip, callback=regular_port_cb_result, sudo=False)
@@ -162,6 +167,12 @@ def regular_port_cb_result(host, scan_data):
 	print ('Host: {}, Scan data: {}'.format(host, scan_data))
 	update_db(host, scan_data)
 	return 'Success'
+
+def full_port_scan(ip): 
+	arguments = '-sV -p-'
+	nm.scan(ip, callback=regular_port_cb_result, sudo=False)
+	pass
+
 
 def tor_network_scan_port(ip):
 	return
