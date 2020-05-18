@@ -26,6 +26,8 @@ db.createUser({
 create unique index for ip
     db.ip.createIndex({'ip': 1}, { unique: true})
 
+db.createCollection('vuln')
+
 command run: 
 main app: 
   python app.py
@@ -38,5 +40,7 @@ ip['nmap']['scan'][ip['ip']]['tcp']
 vuln db:
   create vuln DB with fields 
     (id, service, vuln, product, version, details, mitigation method)
+
+
 
 https://hunter.io/

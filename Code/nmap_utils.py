@@ -102,34 +102,60 @@ def update_status_scan(ip, scan_type_list):
 	return
 
 # some misunderstanding this situation
-def update_db(host, scan_data):
+def update_db(host, scan_data, mode='script'):
 	ip_entity = app.ip_clt.find_one({'ip': host})
 	scan_data = convert_key_to_string(host, scan_data)
 
 	old_port_data = ip_entity['scan'][host]['tcp']
 	new_port_data = scan_data['scan'][host]['tcp']
 	print ("NEW PORT DATA: {}".format(new_port_data))
-	for port, service in new_port_data.items():
-		print ("Port: {}, Service: {}".format(port, service))
-		if port not in old_port_data.keys():
-			continue
 
-		if 'script' in service and 'script' in old_port_data[port]:
-			new_port_data[port]['script'] = {**old_port_data[port]['script'], **new_port_data[port]['script']}
-		elif 'script' in old_port_data[port]:
-			service['script'] = old_port_data[port]['script']
+	# script scan data
+	if mode == 'script':
+		for port, service in new_port_data.items():
+			print ("Port: {}, Service: {}".format(port, service))
+			if port not in old_port_data.keys():
+				continue
 
-		if old_port_data[port]['product'] != '':
-			service['product'] = old_port_data[port]['product']
-			service['version'] = old_port_data[port]['version']
+			if 'script' in service and 'script' in old_port_data[port]:
+				new_port_data[port]['script'] = {**old_port_data[port]['script'], **new_port_data[port]['script']}
+			elif 'script' in old_port_data[port]:
+				service['script'] = old_port_data[port]['script']
 
-	# if old scan have a port new scan doesn't have
-	# fix with scan type (all, regular, script scan, scan type)
-	for port, service in old_port_data.items():
-		if port not in new_port_data.keys():
-			new_port_data[port] = service
+			if old_port_data[port]['product'] != '':
+				service['product'] = old_port_data[port]['product']
+				service['version'] = old_port_data[port]['version']
 
-	# host scripts
+		# if old scan have a port new scan doesn't have
+		# fix with scan type (all, regular, script scan, scan type)
+		for port, service in old_port_data.items():
+			if port not in new_port_data.keys():
+				new_port_data[port] = service
+
+	# all_port scan data
+	elif mode == 'all_port':
+		for port, service in old_port_data.items():
+			print ("Port: {}, Service: {}".format(port, service))
+
+			if port not in new_port_data.keys():
+				continue
+			
+			if 'script' in service and 'script' in new_port_data[port]:
+				new_port_data[port]['script'] = {**service['script'], **new_port_data[port]['script']}
+			elif 'script' in service:
+				new_port_data[port]['script'] = service['script']
+	
+	elif mode == 'regular_port':
+		for port,service in new_port_data.items():
+			if port not in old_port_data.keys():
+				old_port_data[port] = service 
+			elif port in old_port_data.keys():
+				if service['name'] == old_port_data[port]['name'] and service['product'] == old_port_data[port]['product'] and service['version'] == old_port_data[port]['version']:
+					continue
+				else:
+					old_port_data[port] = service
+
+	# update hostscript
 	if 'hostscript' in ip_entity['scan'] and 'hostscript' not in scan_data['scan']:
 		scan_data['scan']['hostscript'] = ip_entity['scan']['hostscript']
 
@@ -139,15 +165,10 @@ def update_db(host, scan_data):
 
 		new_host_script = {**old_host_script, **new_host_script}
 
-		# update host script 
-		# Pending
-		# for script in old_host_script:
-		# 	if script['id'] not in new_host_script:
-		# 		pass
-
-	scan_data['scan'][host]['tcp'] = new_port_data
-
-	# loop through scan_data and update state port and script
+	if mode == 'regular_port':
+		scan_data['scan'][host]['tcp'] = old_port_data
+	else:
+		scan_data['scan'][host]['tcp'] = new_port_data
 
 	if len(scan_data) != 0:
 		app.ip_clt.update({'_id': ip_entity['_id']}, 
@@ -173,32 +194,30 @@ def convert_key_to_string(host, nmap_result):
 # port scan
 def regular_scan_port(ip):
 	# Scan port
-	nm.scan(ip, callback=regular_port_cb_result, sudo=False)
+	nm.scan(ip, callback=port_scan_cb_regular, sudo=False)
 
-def regular_port_cb_result(host, scan_data):
+def full_tcp_port_scan(ip): 
+	args = '-sV -p-'
+	nm.scan(ip, arguments=args, callback=port_scan_cb_all, sudo=False)
+	pass
+
+def port_scan_cb_all(host, scan_data):
 	# update to DB
 	print ('Host: {}, Scan data: {}'.format(host, scan_data))
-	update_db(host, scan_data)
+	update_db(host, scan_data, mode='all_port')
 	return 'Success'
 
-def full_port_scan(ip): 
-	arguments = '-sV -p-'
-	nm.scan(ip, callback=regular_port_cb_result, sudo=False)
-	pass
+def port_scan_cb_regular(host, scan_data):
+	# update to DB
+	print ('Host: {}, Scan data: {}'.format(host, scan_data))
+	update_db(host, scan_data, mode='regular_port')
+	return 'Success'
+
+
 
 
 def tor_network_scan_port(ip):
 	return
-
-def scan_all_port(ip_list):
-	port_range = '1-65535'
-	nm = nmap.PortScannerAsync()
-	for ip in ip_list:
-		nm.scan(ip, port_range, callback=all_port_cb, sudo=False)
-	pass
-
-def all_port_cb(host, scan_data):
-	pass
 
 def scan_service():
 	pass

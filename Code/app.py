@@ -181,11 +181,28 @@ class IPAPI(Resource):
 				return redirect(url_for('target_dashboard'))
 
 
+class VulnListAPI(Resource):
+	def get(self):
+		pass
+
+	def port(self):
+		pass
+
+class VulnAPI(Resource):
+	def get(id):
+		pass
+
+	def port(id):
+		pass
+
 api.add_resource(DomainListAPI, '/targets', endpoint = 'api.domains')
 api.add_resource(SubDomainAPI, '/targets/<string:domain_name>', endpoint = 'api.subdomain')
 
 api.add_resource(IPListAPI, '/ips', endpoint = 'api.ips')
 api.add_resource(IPAPI, '/ips/<string:ip>', endpoint = 'api.ip')
+
+api.add_resource(VulnListAPI, '/vulns', endpoint = 'api.vulns')
+api.add_resource(VulnAPI, '/vulns/<string:id>', endpoint = 'api.vuln')
 
 @app.route('/api/domains/list')
 def domain_list():
@@ -290,7 +307,17 @@ def ip_scan_worker(ip):
 	nmap_utils.regular_scan_port(ip)
 	return
 
+# All port scan
+@app.route('/full_port_scan/<string:ip>')
+def full_port_scan(ip):
+	full_port_scan_worker.delay(ip)
+	return redirect(url_for('api.ips'))
 
+@celery.task(name='app.full_port_scan')
+def full_port_scan_worker(ip):
+	print ("Start running full port scan on {}...".format(ip))
+	nmap_utils.full_tcp_port_scan(ip)
+	return
 
 
 
