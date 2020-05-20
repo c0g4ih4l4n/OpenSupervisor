@@ -20,6 +20,7 @@ import domain_utils
 from bson.json_util import dumps
 
 import nmap_utils
+import vuln_utils
 
 
 from flask_celery import make_celery
@@ -52,6 +53,7 @@ mongo = PyMongo(app)
 db = mongo.db
 dm_clt = mongo.db.domain
 ip_clt = mongo.db.ip
+vuln_clt = mongo.db.vuln
 
 api = Api(app)
 
@@ -183,7 +185,10 @@ class IPAPI(Resource):
 
 class VulnListAPI(Resource):
 	def get(self):
-		pass
+		headers = {'Content-Type': 'text/html'}
+		vulns = vuln_clt.find({})
+		vulns_json = vuln_utils.cursor_to_json(vulns)
+		return make_response(render_template('vuln_dashboard.html', vulns=vulns_json), 200, headers)
 
 	def port(self):
 		pass
@@ -321,11 +326,12 @@ def full_port_scan_worker(ip):
 
 
 
-@app.route('/vuln-database')
-def vuln_db_dashboard():
-	return render_template('vuln-database.html')
 
+# vuln database
+@app.route('/vulns/create')
+def create_vuln():
 
+	return render_template("vuln_create.html")
 
 @app.route('/google_hacking_dashboard')
 def google_hacking_dashboard():

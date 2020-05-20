@@ -11,7 +11,7 @@
 		<a href="{{ url_for('domain_dashboard') }}">Dashboard</a>
 		<a href="{{ url_for('api.ips') }}">IP Dashboard</a>
 		<a href="{{ url_for('google_hacking_dashboard') }}">Google Hacking Queries</a>
-		<a href="{{ url_for('vuln_db_dashboard') }}">Vuln Database</a>
+		<a href="{{ url_for('api.vulns') }}">Vuln Database</a>
 	</div>
 	List IPs:
 	<table border="1px">
@@ -24,8 +24,9 @@
             <th>Mitigation</th>
             <th>Avaiable Exploit</th>
 		</tr>
+		{% for vuln in vulns %}
 		<tr>
-            <td>1</td>
+            <td></td>
             <td>SSH</td>
             <td>CVE-2012-5975</td>
             <td>cve.py</td>
@@ -33,8 +34,9 @@
             <td>Update to latest version of Software</td>
             <td>Yes</td>
 		</tr>
+		{% endfor %}
 	</table>
-	<a href="{{ url_for('create_ip') }}">Create new one</a>
+	<a href="{{ url_for('create_vuln') }}">Create new one</a>
 
 	<script type="text/javascript">
 

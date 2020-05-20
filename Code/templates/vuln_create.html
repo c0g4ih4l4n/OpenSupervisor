@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Vulnerability Dashboard</title>
+</head>
+<body>
+	<h1>Vulnerability Dashboard</h1>
+	<h3>Create new Vulnerability</h3>
+	<form action="{{ url_for('api.vulns') }}" method="POST">
+		<label>Service</label>
+		<input type="text" name="service">
+		<br>
+
+		<label>Vuln Name</label>
+		<input type="text" name="vuln_name">
+		<br>
+
+		<label>Product</label>
+		<input type="text" name="vuln_name">
+		<br>
+
+		<label>Version</label>
+		<input type="text" name="version">
+		<br>
+
+		<label for="bruteforce-option">Brute Force</label>
+		<br>
+
+		<label for="">Yes</label>
+		<input type="radio" name="brute_force" value="1">
+		<label for="">No</label>
+		<input type="radio" name="brute_force" value="0">
+		<br>
+		<input type="submit" value="Create">
+	</form>
+</body>
+</html>
