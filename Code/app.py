@@ -18,6 +18,7 @@ from bson import json_util
 import json
 import domain_utils
 from bson.json_util import dumps
+from bson import ObjectId
 
 import nmap_utils
 import vuln_utils
@@ -53,6 +54,7 @@ mongo = PyMongo(app)
 db = mongo.db
 dm_clt = mongo.db.domain
 ip_clt = mongo.db.ip
+service_clt = mongo.db.service
 vuln_clt = mongo.db.vuln
 
 api = Api(app)
@@ -190,15 +192,101 @@ class VulnListAPI(Resource):
 		vulns_json = vuln_utils.cursor_to_json(vulns)
 		return make_response(render_template('vuln_dashboard.html', vulns=vulns_json), 200, headers)
 
-	def port(self):
-		pass
+	def post(self):
+		service = request.form['service']
+		vuln_name = request.form['vuln_name'] if request.form['vuln_name'] is not None else ""
+		product = request.form['product'] if request.form['product'] is not None else ""
+		version = request.form['version'] if request.form['version'] is not None else ""
+		script = request.form['script'] if request.form['script'] is not None else ""
+		detail = request.form['detail'] if request.form['detail'] is not None else ""
+		mitigation_methods = request.form['mitigation_methods'] if request.form['mitigation_methods'] is not None else ""
+
+		available_exploit = True if request.form['available_exploit'] == 'yes' else False
+
+		new_vuln = {"service": service, "vuln_name": vuln_name, "product": product, 'version': version, "script": script, 'detail': detail, 'mitigation_methods': mitigation_methods, 'available_exploit': available_exploit}
+		vuln_clt.insert(new_vuln)
+
+		return redirect(url_for('api.vulns'))
 
 class VulnAPI(Resource):
-	def get(id):
-		pass
 
-	def port(id):
-		pass
+	# push it back
+	def get(self, vuln):
+		headers = {'Content-Type': 'text/html'}
+		vuln_entity = vuln_clt.find_one({'ip': vuln})
+		scan_type_list = ['auth', 'broadcast', 'brute', 'default', 'discovery', 'dos', 'exploit', 'external', 'fuzzer', 'intrusive', 'malware', 'safe', 'version', 'vuln']
+		return make_response(render_template('ip_detail.html', ip=ip_entity, scan_type_list=scan_type_list), 200, headers)
+
+	# vuln scan 
+	def post(self, vuln_id):
+		if request.form['_method'] == 'PUT':
+			vuln = vuln_clt.find_one({'_id': ObjectId(vuln_id)})
+
+			vuln['service'] = request.form['service']
+			vuln['vuln_name'] = request.form['vuln_name'] if request.form['vuln_name'] is not None else ""
+			vuln['product'] = request.form['product'] if request.form['product'] is not None else ""
+			vuln['version'] = request.form['version'] if request.form['version'] is not None else ""
+			vuln['script'] = request.form['script'] if request.form['script'] is not None else ""
+			vuln['detail'] = request.form['detail'] if request.form['detail'] is not None else ""
+			vuln['mitigation_methods'] = request.form['mitigation_methods'] if request.form['mitigation_methods'] is not None else ""
+
+			vuln['available_exploit'] = True if request.form['available_exploit'] == 'yes' else False
+			
+			vuln_clt.update_one({'_id' : vuln['_id']}, {'$set': vuln})
+			return redirect(url_for('api.vulns'))
+		elif request.form['_method'] == 'DELETE':
+				vuln_clt.remove({'_id': ObjectId(vuln_id)})
+				return redirect(url_for('api.vulns'))
+
+class ServiceListAPI(Resource):
+	def get(self):
+		headers = {'Content-Type': 'text/html'}
+		services = service_clt.find({})
+		services_json = vuln_utils.cursor_to_json(services)
+		return make_response(render_template('service_dashboard.html', services=services_json), 200, headers)
+
+	def post(self):
+		# return request.form.getlist('protocol')
+		service_name = request.form['service_name']
+		description = request.form['description'] if request.form['description'] is not None else ""
+		protocol = request.form.getlist('protocol')
+		tls = request.form['tls'] if request.form['tls'] is not None else 0
+		common_port = request.form['common_port'] if request.form['common_port'] is not None else ""
+
+		new_serv = {"service_name": service_name, "description": description, 'protocol': protocol, 'tls': tls, 'common_port': common_port}
+		service_clt.insert(new_serv)
+
+		return redirect(url_for('api.services'))
+
+class ServiceAPI(Resource):
+
+	# push it back
+	def get(self, vuln):
+		headers = {'Content-Type': 'text/html'}
+		vuln_entity = vuln_clt.find_one({'ip': vuln})
+		scan_type_list = ['auth', 'broadcast', 'brute', 'default', 'discovery', 'dos', 'exploit', 'external', 'fuzzer', 'intrusive', 'malware', 'safe', 'version', 'vuln']
+		return make_response(render_template('ip_detail.html', ip=ip_entity, scan_type_list=scan_type_list), 200, headers)
+
+	# vuln scan 
+	def post(self, service_id):
+		if request.form['_method'] == 'PUT':
+			# return request.form
+			service = service_clt.find_one({'_id': ObjectId(service_id)})
+
+			service['service_name'] = request.form['service_name']
+			service['description'] = request.form['description'] if request.form['description'] is not None else ""
+			service['protocol'] = request.form.getlist('protocol')
+			service['tls'] = request.form['tls'] if request.form['tls'] is not None else 0
+
+			service['common_port'] = request.form['common_port'] if request.form['common_port'] is not None else ""
+
+			
+			service_clt.update_one({'_id' : service['_id']}, {'$set': service})
+			return redirect(url_for('api.services'))
+		elif request.form['_method'] == 'DELETE':
+			service_clt.remove({'_id': ObjectId(service_id)})
+			return redirect(url_for('api.services'))
+
 
 api.add_resource(DomainListAPI, '/targets', endpoint = 'api.domains')
 api.add_resource(SubDomainAPI, '/targets/<string:domain_name>', endpoint = 'api.subdomain')
@@ -207,7 +295,10 @@ api.add_resource(IPListAPI, '/ips', endpoint = 'api.ips')
 api.add_resource(IPAPI, '/ips/<string:ip>', endpoint = 'api.ip')
 
 api.add_resource(VulnListAPI, '/vulns', endpoint = 'api.vulns')
-api.add_resource(VulnAPI, '/vulns/<string:id>', endpoint = 'api.vuln')
+api.add_resource(VulnAPI, '/vulns/<string:vuln_id>', endpoint = 'api.vuln')
+
+api.add_resource(ServiceListAPI, '/services', endpoint = 'api.services')
+api.add_resource(ServiceAPI, '/services/<string:service_id>', endpoint = 'api.service')
 
 @app.route('/api/domains/list')
 def domain_list():
@@ -330,8 +421,15 @@ def full_port_scan_worker(ip):
 # vuln database
 @app.route('/vulns/create')
 def create_vuln():
-
+	# get list service
+	
 	return render_template("vuln_create.html")
+
+@app.route('/vulns/edit/<string:vuln_id>')
+def edit_vuln(vuln_id):
+	# get vuln in db
+	vuln_entity = vuln_clt.find_one({'_id': ObjectId(vuln_id)})
+	return render_template("edit_vuln.html", vuln=vuln_entity)
 
 @app.route('/google_hacking_dashboard')
 def google_hacking_dashboard():
@@ -339,7 +437,16 @@ def google_hacking_dashboard():
 
 
 
+# service database
+@app.route('/services/create')
+def create_service():
+	return render_template("service_create.html")
 
+@app.route('/services/edit/<string:service_id>')
+def edit_service(service_id):
+	# get service
+	service_entity = service_clt.find_one({'_id': ObjectId(service_id)})
+	return render_template('service_edit.html', service=service_entity)
 
 
 

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Service Dashboard</title>
+</head>
+<body>
+	<h1>Service Dashboard</h1>
+	<h3>Edit Service</h3>
+	<form action="{{ url_for('api.service', service_id=service['_id']) }}" method="POST">
+        <input type="text" hidden name="_method" value="PUT">
+		<label>Service name</label>
+		<input type="text" name="service_name" value="{{ service['service_name'] }}">
+		<br>
+
+		<label>Description</label>
+		<input type="text" name="description" value="{{ service['description'] }}">
+		<br>
+
+		<label>Protocol</label>
+        <div>
+        <input type="checkbox" id="tcp" name="protocol" value="tcp"
+                {% if 'tcp' in service['protocol'] %} checked {% endif %}>
+        <label for="tcp">TCP</label>
+        </div>
+
+        <div>
+        <input type="checkbox" id="udp" name="protocol" value='udp' {% if 'udp' in service['protocol'] %} checked {% endif %}>
+        <label for="udp">UDP</label>
+        </div>
+
+        <label for="">TLS</label>
+        {% if ("tls" in service and service['tls'] == "1") %}
+        <input type="radio" value="1" name="tls" checked="checked">Yes
+        <input type="radio" value="0" name="tls">No
+        {% elif ("tls" in service and service["tls"] == "0") %}
+        <input type="radio" value="1" name="tls">Yes
+        <input type="radio" value="0" name="tls" checked="checked">No
+        {% else %}
+        <input type="radio" value="1" name="tls">Yes
+        <input type="radio" value="0" name="tls">No
+        {% endif %}
+        <br>
+
+		<label>Common Port</label>
+		<input type="text" name="common_port" value="{{ service['common_port'] }}">
+		<br>
+
+		<input type="submit" value="Update">
+	</form>
+</body>
+</html>

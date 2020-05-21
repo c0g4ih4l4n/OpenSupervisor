@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Vulnerability Edit</title>
+</head>
+<body>
+	<h1>Vulnerability Edit</h1>
+	<h3>Edit Vulnerability</h3>
+	<form action="{{ url_for('api.vuln', vuln_id=vuln['_id']) }}" method="POST">
+		<input type="text" hidden name='_method' value="PUT">
+		<label>Service</label>
+		<input type="text" name="service" value="{{ vuln['service'] }}">
+		<br>
+
+		<label>Vuln Name</label>
+		<input type="text" name="vuln_name" value="{{ vuln['vuln_name'] }}">
+		<br>
+
+		<label>Product</label>
+		<input type="text" name="product" value="{{ vuln['product'] }}">
+		<br>
+
+		<label>Version</label>
+		<input type="text" name="version" value="{{ vuln['version'] }}">
+		<br>
+
+		<label for="script">Script</label>
+		<input type="text" name="script" value="{{ vuln['script'] }}">
+		<br>
+
+		<label for="detail">Detail</label>
+		<input type="text" name="detail" value="{{ vuln['detail'] }}">
+		<br>
+
+		<label for="mitigation_methods">Mitigation Methods</label>
+		<input type="text" name="mitigation_methods"  value="{{ vuln['mitigation_methods'] }}">
+		<br>
+
+		<label for="available_exploit">Available Exploit</label>
+		<br>
+		{% if vuln['available_exploit'] %}
+		<label for="">Yes</label>
+		<input type="radio" name="available_exploit" value="yes" checked>
+		<label for="">No</label>
+		<input type="radio" name="available_exploit" value="no">
+		<br>
+
+		{% else %}
+		<label for="">Yes</label>
+		<input type="radio" name="available_exploit" value="yes" >
+		<label for="">No</label>
+		<input type="radio" name="available_exploit" value="no" hecked>
+		<br>
+		{% endif %}
+		<input type="submit" value="Update">
+	</form>
+</body>
+</html>

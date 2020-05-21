@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Service Dashboard</title>
+</head>
+<body>
+	<h1>Service Dashboard</h1>
+	<h3>Create new Service</h3>
+	<form action="{{ url_for('api.services') }}" method="POST">
+		<label>Service name</label>
+		<input type="text" name="service_name">
+		<br>
+
+		<label>Description</label>
+		<input type="text" name="description">
+		<br>
+
+		<label>Protocol</label>
+        <div>
+        <input type="checkbox" id="tcp" name="protocol" value="tcp"
+                >
+        <label for="tcp">TCP</label>
+        </div>
+
+        <div>
+        <input type="checkbox" id="udp" name="protocol" value='udp'>
+        <label for="udp">UDP</label>
+        </div>
+
+        <label for="">TLS</label>
+        <input type="radio" value="1" name="tls">Yes
+        <input type="radio" value="0" name="tls">No
+        <br>
+
+		<label>Common Port</label>
+		<input type="text" name="common_port">
+		<br>
+
+		<input type="submit" value="Create">
+	</form>
+</body>
+</html>

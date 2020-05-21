@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Vulnerabilities Dashboard</title>
+	<meta http-equiv="refresh" content="5"/>
+</head>
+<body>
+	<h1>Dashboard</h1>
+	{% include 'menu.html' %}
+
+	List IPs:
+	<table border="1px">
+		<tr>
+			<th>ID</th>
+            <th>Service</th>
+			<th>Protocol</th>
+			<th>TLS</th>
+			<th>Common Port</th>
+            <th>Description</th>
+			<th>Edit</th>
+			<th>Delete</th>
+		</tr>
+		{% for s in services %}
+		<tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ s['service_name'] }}</td>
+			<td>{{ s['protocol'] }}</td>
+			<td>{{ s['tls'] }}</td>
+			<td>{{ s['common_port'] }}</td>
+			<td>{{ s['description'] }}</td>
+
+			<td><a href="{{ url_for('edit_service', service_id=s['_id']) }}">Edit</a></td>
+			<td><form action="{{ url_for('api.service', service_id=s['_id']) }}" method="POST">
+				<input type="hidden" name="_method" value="DELETE">
+				<input type="submit" value="Delete">
+			</form></td>
+		</tr>
+		{% endfor %}
+	</table>
+	<a href="{{ url_for('create_service') }}">Create new one</a>
+
+	<script type="text/javascript">
+
+	</script>
+</body>
+</html>

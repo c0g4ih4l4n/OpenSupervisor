@@ -6,33 +6,38 @@
 </head>
 <body>
 	<h1>Dashboard</h1>
-	<div class="vertical-menu">
-		<a href="#" class="active">Home</a>
-		<a href="{{ url_for('domain_dashboard') }}">Dashboard</a>
-		<a href="{{ url_for('api.ips') }}">IP Dashboard</a>
-		<a href="{{ url_for('google_hacking_dashboard') }}">Google Hacking Queries</a>
-		<a href="{{ url_for('api.vulns') }}">Vuln Database</a>
-	</div>
+	{% include 'menu.html' %}
 	List IPs:
 	<table border="1px">
 		<tr>
 			<th>ID</th>
             <th>Service</th>
-            <th>Vuln</th>
+            <th>Vuln Name</th>
+			<th>Product</th>
+			<th>Version</th>
             <th>Script</th>
             <th>Detail</th>
             <th>Mitigation</th>
-            <th>Avaiable Exploit</th>
+			<th>Avaiable Exploit</th>
+			<th>Edit</th>
+			<th>Delete</th>
 		</tr>
 		{% for vuln in vulns %}
 		<tr>
-            <td></td>
-            <td>SSH</td>
-            <td>CVE-2012-5975</td>
-            <td>cve.py</td>
-            <td>USERAUTH CHANGE REQUEST</td>
-            <td>Update to latest version of Software</td>
-            <td>Yes</td>
+            <td>{{ loop.index }}</td>
+            <td>{{ vuln['service'] }}</td>
+            <td>{{ vuln['vuln_name'] }}</td>
+            <td>{{ vuln['product'] }}</td>
+            <td>{{ vuln['version'] }}</td>
+            <td>{{ vuln['script'] }}</td>
+            <td>{{ vuln['detail'] }}</td>
+			<td>{{ vuln['mitigation_methods'] }}</td>
+			<td>{{ vuln['available_exploit'] }}</td>
+			<td><a href="{{ url_for('edit_vuln', vuln_id=vuln['_id']) }}">Edit</a></td>
+			<td><form action="{{ url_for('api.vuln', vuln_id=vuln['_id']) }}" method="POST">
+				<input type="hidden" name="_method" value="DELETE">
+				<input type="submit" value="Delete">
+			</form></td>
 		</tr>
 		{% endfor %}
 	</table>
