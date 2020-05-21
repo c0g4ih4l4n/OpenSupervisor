@@ -8,7 +8,12 @@
 	<h3>Create new Vulnerability</h3>
 	<form action="{{ url_for('api.vulns') }}" method="POST">
 		<label>Service</label>
-		<input type="text" name="service">
+
+		<select name="service" id="service">
+			{% for service in services %}
+			<option value="{{ service['service_name'] }}">{{ service['service_name'] }}</option>
+			{% endfor %}
+		</select>
 		<br>
 
 		<label>Vuln Name</label>

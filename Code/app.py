@@ -422,8 +422,8 @@ def full_port_scan_worker(ip):
 @app.route('/vulns/create')
 def create_vuln():
 	# get list service
-	
-	return render_template("vuln_create.html")
+	services = service_clt.find({})
+	return render_template("vuln_create.html", services=services)
 
 @app.route('/vulns/edit/<string:vuln_id>')
 def edit_vuln(vuln_id):
