@@ -51,7 +51,7 @@ Log monitoring:
 Server listen for request:
     XSS Hunter
     SSRF Server
-    
+
 Content Secure Policy for get header:
     curl -s -I -L “https://www.newyorker.com/" | grep -Ei ‘^Content-Security-Policy:’ | sed “s/;/;\\n/g”
 
@@ -65,3 +65,6 @@ Service HTTP
 
 List Service:
     Add common port for TCP and UDP
+
+Make google hacking queries
+    - 
