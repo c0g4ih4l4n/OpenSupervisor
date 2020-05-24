@@ -2,42 +2,107 @@
 <html>
 <head>
 	<title>Google Hacking Queries</title>
-	<meta http-equiv="refresh" content="5"/>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
 	<h1>Dashboard</h1>
-	<div class="vertical-menu">
-		<a href="#" class="active">Home</a>
-		<a href="{{ url_for('domain_dashboard') }}">Dashboard</a>
-		<a href="{{ url_for('api.ips') }}">IP Dashboard</a>
-		<a href="{{ url_for('google_hacking_dashboard') }}">Google Hacking Queries</a>
-		<a href="{{ url_for('vuln_db_dashboard') }}">Vuln Database</a>
-	</div>
-	List IPs:
-	<table border="1px">
-		<tr>
-			<th>ID</th>
-            <th>Service</th>
-            <th>Vuln</th>
-            <th>Script</th>
-            <th>Detail</th>
-            <th>Mitigation</th>
-            <th>Avaiable Exploit</th>
-		</tr>
-		<tr>
-            <td>1</td>
-            <td>SSH</td>
-            <td>CVE-2012-5975</td>
-            <td>cve.py</td>
-            <td>USERAUTH CHANGE REQUEST</td>
-            <td>Update to latest version of Software</td>
-            <td>Yes</td>
-		</tr>
-	</table>
-	<a href="{{ url_for('create_ip') }}">Create new one</a>
+	{% include 'menu.html' %}
+	<form action="" id="tool-form" novalidate="novalidate">
+		<label for="">Enter URL</label>
+		<input type="text" name="url" id="target">
+	</form>
 
+	<!-- main queries -->
+	{% for id, query in queries.items() %}
+	<a href="/" target="_blank" id="pub_doc" onclick="do_google_search({{ id }})">{{ query }}</a>
+	<br>
+	{% endfor  %}
+<!-- 
 	<script type="text/javascript">
+		pub_doc_base = ""
+		$(document).ready(function(){
+			$("#url").change(function(){
+				//change href attribute of 
+				url = $("#url").val()
+				pub_doc = "/" + url
+				console.log(url)
+				$("#pub_doc").attr("href", pub_doc)
+			});
+		});
+		
+	</script> -->
 
-	</script>
+
+<!-- pentest tools -->
+<script>
+	function do_google_search(type) 
+	{
+		/*if($('#tool-form').valid() == false) {
+			return;
+		}*/
+		
+		site = document.getElementById('target').value;
+		if (site.indexOf('://') > 0) {
+			site = site.substr(site.indexOf('://')+3);
+		}
+		if (site.indexOf('/') > 0) {
+			site = site.substr(0, site.indexOf('/'));
+		}
+		if (site.indexOf('?') > 0) {
+			site = site.substr(0, site.indexOf('?'));
+		}
+		if (site.indexOf('&') > 0) {
+			site = site.substr(0, site.indexOf('&'));
+		}
+		url = 'https://www.google.com/search?q=';
+		console.log('Site: ' + site)
+		switch(type)
+		{
+			case 1:
+				url += 'site:' + site + '+intitle:index.of';
+				break;
+			case 2:
+				url += 'site:' + site + '+ext:xml+|+ext:conf+|+ext:cnf+|+ext:reg+|+ext:inf+|+ext:rdp+|+ext:cfg+|+ext:txt+|+ext:ora+|+ext:ini+|+ext:env';
+				break;
+			case 3:
+				url += 'site:' + site + '+ext:sql+|+ext:dbf+|+ext:mdb';
+				break;
+			case 4:
+				url += 'site:' + site + '+ext:log';
+				break;
+			case 5:
+				url += 'site:' + site + '+ext:bkf+|+ext:bkp+|+ext:bak+|+ext:old+|+ext:backup';
+				break;
+			case 6:
+				url += 'site:' + site + '+inurl:login';
+				break;
+			case 7:
+				url += 'site:' + site + '+intext:"sql+syntax+near"+|+intext:"syntax+error+has+occurred"+|+intext:"incorrect+syntax+near"+|+intext:"unexpected+end+of+SQL+command"+|+intext:"Warning:+mysql_connect()"+|+intext:"Warning:+mysql_query()"+|+intext:"Warning:+pg_connect()"';
+				break;
+			case 8:
+				url += 'site:' + site + '+ext:doc+|+ext:docx+|+ext:odt+|+ext:rtf+|+ext:sxw+|+ext:psw+|+ext:ppt+|+ext:pptx+|+ext:pps+|+ext:csv';
+				break;
+			case 9:
+				url += 'site:' + site + '+ext:php+intitle:phpinfo+"published+by+the+PHP+Group"';
+				break;
+			case 10:
+				url += 'site:' + site + '+"PHP+Parse+error"+|+"PHP+Warning"+|+"PHP+Error"';
+				break;
+			case 11:
+				url += 'site:pastebin.com | site:paste2.org | site:pastehtml.com | site:slexy.org | site:snipplr.com | site:snipt.net | site:textsnip.com | site:bitpaste.app | site:justpaste.it | site:heypasteit.com | site:hastebin.com | site:dpaste.org | site:dpaste.com | site:codepad.org | site:jsitor.com | site:codepen.io | site:jsfiddle.net | site:dotnetfiddle.net | site:phpfiddle.org | site:ide.geeksforgeeks.org | site:repl.it | site:ideone.com | site:paste.debian.net | site:paste.org | site:paste.org.ru | site:codebeautify.org  | site:codeshare.io | site:trello.com "' + site + '"';
+				break;
+			case 12:
+				url += 'site:github.com | site:gitlab.com "' + site + '"';
+				break;
+			case 13:
+				url += 'site:stackoverflow.com "' + site + '"';
+				break;
+		}
+		window.open(url,'','scrollbars=yes,menubar=no,height=600,width=800,resizable=yes,toolbar=yes,menubar=no,location=no,status=no');
+
+		var img = new Image();
+		img.src = '/?p=tool_exec&tool=google_hacking&site='+site+'&type='+type;
+	}
+</script>
 </body>
 </html>

@@ -254,7 +254,7 @@ class ServiceListAPI(Resource):
 		common_port = request.form['common_port'] if request.form['common_port'] is not None else ""
 
 		new_serv = {"service_name": service_name, "description": description, 'protocol': protocol, 'tls': tls, 'common_port': common_port}
-		service_clt.insert(new_serv)
+		service_clt.insert_one(new_serv)
 
 		return redirect(url_for('api.services'))
 
@@ -433,7 +433,22 @@ def edit_vuln(vuln_id):
 
 @app.route('/google_hacking_dashboard')
 def google_hacking_dashboard():
-	return render_template('google_hacking_dashboard.html')
+	queries = {
+		'1': 'Directory listing vulnerabilities',
+		'2': 'Configuration files exposed',
+		'3': 'Database files exposed',
+		'4':'Log files exposed',
+		'5':'Backup and old files',
+		'6':'Login pages',
+		'7':'SQL errors',
+		'8':'Publicly exposed documents',
+		'9':'phpinfo()',
+		'10':'PHP errors / warnings',
+		'11':'Search Pastebin.com / pasting sites',
+		'12':'Search Github.com and Gitlab.com',
+		'13':'Search Stackoverflow.com'
+	}
+	return render_template('google_hacking_dashboard.html', queries=queries)
 
 
 
