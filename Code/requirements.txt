@@ -10,3 +10,4 @@ flower
 python-nmap
 python-whois
 ipwhois
+webscreenshot

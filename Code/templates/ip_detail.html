@@ -12,13 +12,7 @@
 <body>
     <h1>IP Detail</h1>
     <h3>For {{ ip['ip'] }}</h3>
-	<div class="vertical-menu">
-		<a href="#" class="active">Home</a>
-		<a href="{{ url_for('domain_dashboard') }}">Dashboard</a>
-		<a href="{{ url_for('api.ips') }}">IP Dashboard</a>
-		<a href="{{ url_for('google_hacking_dashboard') }}">Google Hacking Queries</a>
-		<a href="{{ url_for('vuln_db_dashboard') }}">Vuln Database</a>
-    </div>
+    {% include 'menu.html' %}
     IP information:
     <div>
         IP: {{ ip['ip'] }}
@@ -33,7 +27,11 @@
         Hostname: Not Found
         {% endif %}
         <br>
-        OS: Windows or Linux
+        OS: {% if 'scan' in ip and 'osmatch' in ip['scan'][ip['ip']] %} 
+        {{ ip['scan'][ip['ip']]['osmatch'][0]['name'] }} Accurate: {{ ip['scan'][ip['ip']]['osmatch'][0]['accuracy'] }} %
+        <br>
+        CPE: {{ ip['scan'][ip['ip']]['osmatch'][0]['osclass'][0]['cpe'] }}
+        {% endif %}
         <br>
         <h4>Host Script Result:</h4>
         <table border="1px">
@@ -41,12 +39,14 @@
                 <th>ID</th>
                 <th>Output</th>
             </tr>
+            {% if 'scan' in ip %}
             {% for script in  ip['scan'][ip['ip']]['hostscript']%}
             <tr>
                 <td>{{ script['id'] }}</td>
                 <td>{{ script['output'] }}</td>
             </tr>
             {% endfor %}
+            {% endif %}
         </table>
         
         <div>Full Port Scan: <a href="{{ url_for('full_port_scan', ip=ip['ip']) }}">Launch</a></div>

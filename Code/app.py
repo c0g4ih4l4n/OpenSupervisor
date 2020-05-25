@@ -12,6 +12,7 @@ import db_utils
 import time
 import ip_utils
 import nmap
+import utils.http as http_utils
 
 from crontab import CronTab
 from bson import json_util
@@ -545,9 +546,26 @@ def brute_credentials(domain):
 	
 	pass
 
+@celery.task(name='app.os_detect')
+def os_detect(ip):
+	print ("OS detect on {}".format(ip))
+	nmap_utils.os_detect(ip)
+	return 'Done'
+
+@celery.task(name='app.screenshot')
+def screen_shot(ip, port, protocol):
+	http_utils.screenshot(ip, port, protocol)
+	return 'Screenshot success'
+
+@app.route('/test/<string:ip>/<string:protocol>/<int:port>', methods=['POST', 'GET'])
+def test_os(ip, protocol, port):
+	http_utils.screenshot(ip, port, protocol)
+	return 'Screenshot Success'
+
 
 @app.route('/test', methods=['POST', 'GET'])
 def test():
+	os_detect()
 	return str(request.form.getlist('scan_type[]'))
 	# return 'Running.'
 

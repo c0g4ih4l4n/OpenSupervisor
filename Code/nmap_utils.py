@@ -222,8 +222,25 @@ def tor_network_scan_port(ip):
 def scan_service():
 	pass
 
-def os_detection():
-	pass
+def os_detect(ip):
+	args = '-O'
+	nm.scan(ip, arguments=args, callback=os_detect_cb, sudo=True)
+	return 'Forking ...'
+
+def os_detect_cb(host, scan_data):
+	# update database with os
+	os_data = scan_data 
+	ip_entity = app.ip_clt.find_one({'ip': host})
+	print ("Data: {}".format(scan_data))
+	scan_data = convert_key_to_string(host, scan_data)
+
+	os_data = scan_data['scan'][host]['osmatch']
+	print ("NEW OS DATA: {}".format(os_data))
+
+	ip_entity['scan'][host]['osmatch'] = os_data
+	app.ip_clt.update_one({'_id': ip_entity['_id']}, {'$set': ip_entity})
+
+	return 'Success'
 
 def script_scan():
 	pass
