@@ -33,7 +33,7 @@ import billiard as multiprocessing
 
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='')
 app.config.from_object('config')
 
 app.url_map.strict_slashes = False
@@ -553,8 +553,8 @@ def os_detect(ip):
 	return 'Done'
 
 @celery.task(name='app.screenshot')
-def screen_shot(ip, port, protocol):
-	http_utils.screenshot(ip, port, protocol)
+def screenshot_worker(list_http_serv):
+	http_utils.screenshot_list(list_http_serv)
 	return 'Screenshot success'
 
 @app.route('/test/<string:ip>/<string:protocol>/<int:port>', methods=['POST', 'GET'])
@@ -565,10 +565,15 @@ def test_os(ip, protocol, port):
 
 @app.route('/test', methods=['POST', 'GET'])
 def test():
-	os_detect()
-	return str(request.form.getlist('scan_type[]'))
+	res = http_utils.get_all_http_serv()
+	# screenshot
+	screenshot_worker.delay(res)
+	return 'Success'
 	# return 'Running.'
 
+@app.route('/images/screenshots/<path:path>')
+def send_images(path):
+	return send_from_directory('screenshots', path)
 
 if __name__ == '__main__':
 	app.debug = True

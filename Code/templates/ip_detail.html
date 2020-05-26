@@ -27,7 +27,7 @@
         Hostname: Not Found
         {% endif %}
         <br>
-        OS: {% if 'scan' in ip and 'osmatch' in ip['scan'][ip['ip']] %} 
+        OS: {% if 'scan' in ip and 'osmatch' in ip['scan'][ip['ip']] %}
         {{ ip['scan'][ip['ip']]['osmatch'][0]['name'] }} Accurate: {{ ip['scan'][ip['ip']]['osmatch'][0]['accuracy'] }} %
         <br>
         CPE: {{ ip['scan'][ip['ip']]['osmatch'][0]['osclass'][0]['cpe'] }}
@@ -90,6 +90,7 @@
 	<table border="1px">
 		<tr>
 			<th>ID</th>
+            <th>Screenshot</th>
             <th>Port</th>
             <th>Type</th>
             <th>State</th>
@@ -105,7 +106,8 @@
         {% if 'scan' in ip and ip['ip'] in ip['scan'] %}
 		{% for port, service in ip['scan'][ip['ip']]['tcp'].items() %}
 		<tr>
-			<td>{{ loop.index }}</td>
+            <td>{{ loop.index }}</td>
+            <td><img src="/images/{{ service['screenshot'] }}" alt="" width="50px"></td>
 			<td><a href="">{{ port }}</a></td>
 			<td>TCP</td>
             <td>{{ service['state'] }}</td>
