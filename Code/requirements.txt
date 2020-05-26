@@ -11,3 +11,5 @@ python-nmap
 python-whois
 ipwhois
 webscreenshot
+openvas_lib
+PyBurprestapi

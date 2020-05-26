@@ -44,3 +44,18 @@ vuln db:
 
 
 https://hunter.io/
+
+burp api company key: XNKy1NyCohRpa5M3svxcGU8XaSxr8u31
+task_id -> location header in response
+get scan result
+/v0.1/scan/{task_id}
+
+
+Burp run in cmd:
+  For automating Burp we generally recommend Burp Enterprise Edition which is designed for this use case.
+
+  You can also run Burp Pro in headless mode:
+
+  bc. java -Djava.awt.headless=true -jar burpsuite_pro.jar
+
+  You can then use the "Rest API":https://portswigger.net/blog/burps-new-rest-api to launch scans.
