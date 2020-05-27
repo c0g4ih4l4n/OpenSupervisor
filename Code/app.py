@@ -13,6 +13,9 @@ import time
 import ip_utils
 import nmap
 import utils.http as http_utils
+import utils.openvas as ovas
+import utils.burpsuite as burp
+import re
 
 from crontab import CronTab
 from bson import json_util
@@ -57,6 +60,7 @@ dm_clt = mongo.db.domain
 ip_clt = mongo.db.ip
 service_clt = mongo.db.service
 vuln_clt = mongo.db.vuln
+burp_clt = mongo.db.burp
 
 api = Api(app)
 
@@ -562,14 +566,42 @@ def test_os(ip, protocol, port):
 	http_utils.screenshot(ip, port, protocol)
 	return 'Screenshot Success'
 
-
-@app.route('/test', methods=['POST', 'GET'])
-def test():
+@app.route('/screenshot/')
+def screenshot():
 	res = http_utils.get_all_http_serv()
 	# screenshot
 	screenshot_worker.delay(res)
 	return 'Success'
-	# return 'Running.'
+
+@app.route('/scan/openvas/<string:target>')
+def openvas_scan(target):
+	scan_id, target_id = ovas.luanch_simple_scanner(target)
+	# save to db
+	ip_ent = ip_clt.find_one({'ip': target})
+	ip_ent['openvan_scan_id'] = scan_id
+	ip_ent['openvas_target_id'] = target_id
+	ip_clt.update_one({'_id': ip_ent['_id']}, {'$set': ip_ent})
+	return
+
+@app.route('/burp_scan_dashboard')
+def burp_scan_dashboard(target):
+	
+	return render_template('burp_dashboard.html')
+
+@app.route('/scan/burp/<string:url>')
+def burp_scan(url):
+	task_id = burp.scan(url)
+	if task_id is None:
+		return
+	
+	burp_clt.insert_one({'url': url, 'task_id': task_id})
+	return
+
+@app.route('/test/', methods=['POST', 'GET'])
+def test():
+	target = '192.168.33.1'
+	ovas.luanch_simple_scanner(target)
+	return
 
 @app.route('/images/screenshots/<path:path>')
 def send_images(path):

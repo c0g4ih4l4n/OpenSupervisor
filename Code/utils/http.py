@@ -15,7 +15,7 @@ def get_all_http_serv():
                 http_serv.append({'proto': s['name'], 'ip': ip_res['ip'], 'port': p})
 
     return http_serv
-    # dict: {ip: {protocol: [port]}}
+    # dict: {proto, ip, port}}
 
 def save_res_to_db(http_serv):
     out_dir = 'screenshots/'
@@ -54,4 +54,11 @@ def screenshot(ip, port, protocol):
 
     app.ip_clt.update_one({'_id': ip_entity['_id']}, {'$set': ip_entity})
     os.system(cmd)
+    return
+
+def tech_detect (http_serv):
+    url_list = []
+    for s in url_list:
+        # whatweb
+        continue
     return

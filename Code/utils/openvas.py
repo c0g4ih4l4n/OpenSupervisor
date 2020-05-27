@@ -7,8 +7,8 @@ from functools import partial
 HOST = '192.168.33.11'
 USER = 'admin'
 PASSWORD = 'admin'
-PORT = '4000'
-TIMEOUT = ''
+PORT = 9390
+TIMEOUT = 10
 
 try:
     scanner = VulnscanManager(HOST, USER, PASSWORD, PORT, TIMEOUT)
@@ -17,7 +17,7 @@ except VulnscanException as e:
     print(e)
 
 # simple scan
-def luan_simple_scanner(target):
+def luanch_simple_scanner(target):
     scan_id, target_id = scanner.launch_scan(target = target, # Target to scan
                                          profile = "Full and fast")
     return scan_id, target_id
@@ -31,7 +31,7 @@ def parse_result(result_file):
     results = report_parser(result_file)
     r = None
     for x in results:
-        if x.id = '':
+        if x.id == '':
             r = x
 
     # result
@@ -39,7 +39,7 @@ def parse_result(result_file):
     
 
 # delete scan
-def del_scan(scan_id)
+def del_scan(scan_id):
     scanner.delete_scan(scan_id)
     return
 
@@ -64,7 +64,7 @@ def launch_scanner(target):
                         callback_progress = print_status)
 
     # Wait
-    Sem.acquire()
+    sem.acquire()
 
     # Finished scan
     print("finished")

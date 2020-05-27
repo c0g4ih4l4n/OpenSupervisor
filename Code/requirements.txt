@@ -13,3 +13,4 @@ ipwhois
 webscreenshot
 openvas_lib
 PyBurprestapi
+python-gvm
