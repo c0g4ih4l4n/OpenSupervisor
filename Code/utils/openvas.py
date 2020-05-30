@@ -68,3 +68,15 @@ def launch_scanner(target):
 
     # Finished scan
     print("finished")
+
+def parse(res):
+    output = []
+    results = res.getchildren()
+
+    for result in results:
+        children = result.getchildren()
+        obj = {}
+        for child in children:
+            obj[child.tag] = child.text
+        output.append(obj)
+    return output

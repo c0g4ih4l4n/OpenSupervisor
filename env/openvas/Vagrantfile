@@ -56,7 +56,7 @@ Vagrant.configure("2") do |config|
     vb.gui = false
 
     # Customize the amount of memory on the VM:
-    vb.memory = "512"
+    vb.memory = "1024"
     vb.name = "openvas"
   end
   
@@ -70,20 +70,20 @@ Vagrant.configure("2") do |config|
   # config.vm.provision "shell", inline: <<-SHELL
   #   apt-get update
   #   apt-get install -y apache2
-  sudo add-apt-repository ppa:mrazavi/openvas
-  sudo apt-get update
-  sudo apt install sqlite3
-  sudo apt install openvas9
-  sudo apt install texlive-latex-extra --no-install-recommends
-  sudo apt install texlive-fonts-recommended
-  sudo greenbone-nvt-sync
-  sudo greenbone-scapdata-sync
-  sudo greenbone-certdata-sync
-  sudo systemctl restart openvas-scanner
-  sudo systemctl restart openvas-manager
-  sudo systemctl restart openvas-gsa
-  sudo systemctl enable openvas-scanner
-  sudo systemctl enable openvas-manager
-  sudo systemctl enable openvas-gsa
+  # sudo add-apt-repository ppa:mrazavi/openvas
+  # sudo apt-get update
+  # sudo apt install sqlite3
+  # sudo apt install openvas9
+  # sudo apt install texlive-latex-extra --no-install-recommends
+  # sudo apt install texlive-fonts-recommended
+  # sudo greenbone-nvt-sync
+  # sudo greenbone-scapdata-sync
+  # sudo greenbone-certdata-sync
+  # sudo systemctl restart openvas-scanner
+  # sudo systemctl restart openvas-manager
+  # sudo systemctl restart openvas-gsa
+  # sudo systemctl enable openvas-scanner
+  # sudo systemctl enable openvas-manager
+  # sudo systemctl enable openvas-gsa
   # SHELL
 end
