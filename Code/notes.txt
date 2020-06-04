@@ -64,3 +64,6 @@ start openvas-manager with lport and lip
 
 scan_id:    118056d4-da60-411c-9eb8-904aa03ef375
 target_id:  55655548-4993-47b3-b106-ce9ab89f09a6
+
+run wappanalyzer on docker port 3000
+  query: http://localhost:3000/extract?url=https://vsec.com.vn

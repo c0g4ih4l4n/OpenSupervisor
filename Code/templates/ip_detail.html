@@ -50,6 +50,7 @@
         </table>
         
         <div>Full Port Scan: <a href="{{ url_for('full_port_scan', ip=ip['ip']) }}">Launch</a></div>
+        <div>Vulner Scan: <a href="{{ url_for('vuln_script_scan', ip=ip['ip']) }}">Launch</a></div>
 
     </div>
     <br>
@@ -68,7 +69,7 @@
                 {% for scan_type in scan_type_list %}
                 <tr {% if 'status_scan' in ip and ip["status_scan"][scan_type] == 1 %} class="disabled" {% endif %}>
                     <td>{{ loop.index }}</td>
-                    <td> 
+                    <td>
                         <input type="checkbox" value="{{ scan_type }}" name="scan_type[]">
                     </td>
                     <td>{{ scan_type }}</td>
@@ -102,6 +103,7 @@
             <th>View</th>
             <th>Vuln Scan</th>
             <th>Script Result</th>
+            <th>Technology</th>
         </tr>
         {% if 'scan' in ip and ip['ip'] in ip['scan'] %}
 		{% for port, service in ip['scan'][ip['ip']]['tcp'].items() %}
@@ -124,6 +126,7 @@
             <td><a href="{{ url_for('test') }}">View</a></td>
             <td><a href="{{ url_for('test') }}">Vuln Scan</a></td>
             <td>{{ service['script'] }}</td>
+            <td>{{ service['technology'] }}</td>
 		</tr>
         {% endfor %}
         {% endif %}

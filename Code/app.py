@@ -27,7 +27,6 @@ from bson import ObjectId
 import nmap_utils
 import vuln_utils
 
-
 from flask_celery import make_celery
 
 import subdomain_enum_osint
@@ -408,18 +407,33 @@ def ip_scan_worker(ip):
 	nmap_utils.regular_scan_port(ip)
 	return
 
+
+
 # All port scan
 @app.route('/full_port_scan/<string:ip>')
 def full_port_scan(ip):
 	full_port_scan_worker.delay(ip)
-	return redirect(url_for('api.ips'))
+	return redirect(url_for('api.ip', ip=ip))
 
 @celery.task(name='app.full_port_scan')
 def full_port_scan_worker(ip):
 	print ("Start running full port scan on {}...".format(ip))
-	nmap_utils.full_tcp_port_scan(ip)
+	nmap_utils.vulners_script_scan(ip)
 	return
 
+
+
+# Vulner script scan
+@app.route('/vulner_scan/<string:ip>')
+def vuln_script_scan(ip):
+	vuln_script_scan_worker.delay(ip)
+	return redirect(url_for('api.ip', ip=ip))
+
+@celery.task(name='app.vulner_scan')
+def vuln_script_scan_worker(ip):
+	print ("Start running full port scan on {}...".format(ip))
+	nmap_utils.vulners_script_scan(ip)
+	return
 
 
 

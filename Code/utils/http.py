@@ -1,9 +1,12 @@
 import os
 import app
 import tempfile
+from requests import get
+from json import dump, loads
 
 # need to check again
 out_dir = 'screenshots/'
+wapp_analyzer = 'http://localhost.:3000/extract?url='
 
 def get_all_http_serv():
     http_serv = []
@@ -56,9 +59,10 @@ def screenshot(ip, port, protocol):
     os.system(cmd)
     return
 
-def tech_detect (http_serv):
-    url_list = []
-    for s in url_list:
-        # whatweb
-        continue
-    return
+def tech_detect (url):
+    res = get(wapp_analyzer + url)
+    j_data = loads(res.text)
+    if (len(j_data['applications']) == 0):
+        return
+    
+    return j_data

@@ -89,13 +89,14 @@ def category_scan_cb(host, scan_data):
 	pass
 
 
-def update_status_scan(ip, scan_type_list):
+def update_status_scan(ip, scan_type_list=None):
 	ip_entity = app.ip_clt.find_one({'ip': ip})
 	if 'status_scan' not in ip_entity:
 		ip_entity['status_scan'] = {}
 
-	for st in scan_type_list:
-		ip_entity['status_scan'][st] = 1
+	if scan_type_list is not None:
+		for st in scan_type_list:
+			ip_entity['status_scan'][st] = 1
 	
 	app.ip_clt.update({'_id': ip_entity['_id']}, {'$set': {'status_scan': ip_entity['status_scan']}})
 
@@ -241,6 +242,21 @@ def os_detect_cb(host, scan_data):
 	app.ip_clt.update_one({'_id': ip_entity['_id']}, {'$set': ip_entity})
 
 	return 'Success'
+
+# scan script vulners
+def vulners_script_scan(ip):
+	ports = get_port(ip)
+
+	if len(ports) != 0:
+		args = '-p{} --script {} -T4'.format(','.join(ports), 'vulners')
+	else:
+		args = '--script {} -T4'.format('vulners')
+
+	print ('Argument: {}'.format(args))
+	nm.scan(ip, arguments=args, callback=script_cb, sudo=False)
+	# update status of category scan
+	print ('Scan Done!')
+	return
 
 def script_scan():
 	pass

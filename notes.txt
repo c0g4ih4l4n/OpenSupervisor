@@ -59,12 +59,5 @@ Change scan port method
     - Add UDP Scan
     - Scan port using many methods to get comprehensive result
 
-Service HTTP
-    - Add http request smuggling scanner
-
-
-List Service:
-    Add common port for TCP and UDP
-
-Make google hacking queries
-    - 
+wappanalyer api key 
+6rWzxmwbEfdckIBcRck9f2g4SRon0Ha5GbmXT500
