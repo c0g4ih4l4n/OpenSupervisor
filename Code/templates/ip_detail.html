@@ -1,25 +1,17 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Detail for {{ ip['ip'] }}</title>
-    <meta http-equiv="refresh" content="5"/>
-    <style>
-        tr.disabled {
-            background-color: grey;
-        }
-    </style>
-</head>
-<body>
-    <h1>IP Detail</h1>
-    <h3>For {{ ip['ip'] }}</h3>
-    {% include 'menu.html' %}
+{% extends 'templates/template.html' %}
+{% block content %}
+<div class="content-wrapper">
+
+    <h1>{{ ip['ip'] }} Detail</h1>
     IP information:
     <div>
+
         IP: {{ ip['ip'] }}
         <br>
         Whois data: {{ ip['whois'] }}
         <br>
         Status: {{ ip['status'] }}
+
         <br>
         {% if 'scan' in ip and ip['ip'] in ip['scan'] %}
         Hostname: {{ ip['scan'][ip['ip']]['hostnames'][0]['name'] }}
@@ -33,6 +25,8 @@
         CPE: {{ ip['scan'][ip['ip']]['osmatch'][0]['osclass'][0]['cpe'] }}
         {% endif %}
         <br>
+
+        <br/>
         <h4>Host Script Result:</h4>
         <table border="1px">
             <tr>
@@ -135,8 +129,6 @@
     <br>
 	<a href="{{ url_for('create_ip') }}">Create new one</a>
 
-	<script type="text/javascript">
+</div>
 
-	</script>
-</body>
-</html>
+{% endblock %}

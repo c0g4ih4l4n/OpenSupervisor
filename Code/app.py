@@ -66,6 +66,7 @@ api = Api(app)
 todos = {}
 celery = make_celery(app)
 
+# JINJA_ENVIRONMENT.globals['STATIC_PREFIX'] = '/static/'
 
 
 
@@ -320,8 +321,13 @@ def set_subdomain_scan_schedule(domain):
 	my_jobs.write()
 
 @app.route('/')
-def index():
-	return redirect(url_for("domain_dashboard"))
+def home():
+	return render_template('home_page.html', title="Dragon Scanner", page_title='Home Page')
+
+@app.route('/static/<path:filename>')
+def static_file():
+    
+    return
 
 @app.route('/dashboard')
 def domain_dashboard():
