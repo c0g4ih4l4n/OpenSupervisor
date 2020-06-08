@@ -102,10 +102,10 @@ security = Security(app, user_datastore)
 def create_user():
     user_datastore.create_user(email='miracle@dragon.com', password='1')
 
-@app.before_request
-@login_required
-def before_request():
-	pass
+# @app.before_request
+# @login_required
+# def before_request():
+# 	pass
 # @app.before_request
 # def check_valid_login():
 #     login_valid = 'user' in session # or whatever you use to check valid login

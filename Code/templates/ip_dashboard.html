@@ -66,8 +66,12 @@
 		<tr>
 			<td>{{ loop.index }}</td>
 			<td><a href="">{{ ip['ip'] }}</a></td>
+      {% if 'whois' in ip %}
 			<td>{{ ip['whois']['asn_description'] }}</td>
-			{% if 'scan' in ip %}
+      {% else %}
+      <td></td>
+      {% endif %}
+			{% if 'scan' in ip and ip['ip'] in ip['scan'] %}
 			<td>{{ ip['scan'][ip['ip']]['status']['state'] }}</td>
 			{% else %}
 			<td>{{ ip['status'] }}</td>
