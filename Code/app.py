@@ -77,7 +77,7 @@ class DomainListAPI(Resource):
 		headers = {'Content-Type': 'text/html'}
 		domains = dm_clt.find()
 		domains_json = db_utils.cursor_to_json(domains)
-		return make_response(render_template('domain_dashboard.html', domains=domains_json), 200, headers)
+		return make_response(render_template('domain_dashboard.html', domains=domains_json, title='Domain Dashboard'), 200, headers)
 
 	def post(self):
 		domain_name = request.form['domain_name']
@@ -137,7 +137,7 @@ class IPListAPI(Resource):
 		headers = {'Content-Type': 'text/html'}
 		ips = ip_clt.find()
 		ips_json = ip_utils.cursor_to_json(ips)
-		return make_response(render_template('ip_dashboard.html', ips=ips_json), 200, headers)
+		return make_response(render_template('ip_dashboard.html', ips=ips_json, title='IP Dashboard'), 200, headers)
 
 	def post(self):
 		domain_name = request.form['domain_name']
@@ -168,7 +168,7 @@ class IPAPI(Resource):
 		headers = {}
 		ip_entity = ip_clt.find_one({'ip': ip})
 		scan_type_list = ['auth', 'broadcast', 'brute', 'default', 'discovery', 'dos', 'exploit', 'external', 'fuzzer', 'intrusive', 'malware', 'safe', 'version', 'vuln']
-		return make_response(render_template('ip_detail.html', ip=ip_entity, scan_type_list=scan_type_list), 200, headers)
+		return make_response(render_template('ip_detail.html', ip=ip_entity, scan_type_list=scan_type_list, title='IP Detail'), 200, headers)
 
 	def post(self, domain_name):
 		if request.form['_method'] == 'PUT':
@@ -195,7 +195,7 @@ class VulnListAPI(Resource):
 		headers = {'Content-Type': 'text/html'}
 		vulns = vuln_clt.find({})
 		vulns_json = vuln_utils.cursor_to_json(vulns)
-		return make_response(render_template('vuln_dashboard.html', vulns=vulns_json), 200, headers)
+		return make_response(render_template('vuln_dashboard.html', vulns=vulns_json, title='Vulnerability Dashboard'), 200, headers)
 
 	def post(self):
 		service = request.form['service']
@@ -248,7 +248,7 @@ class ServiceListAPI(Resource):
 		headers = {'Content-Type': 'text/html'}
 		services = service_clt.find({})
 		services_json = vuln_utils.cursor_to_json(services)
-		return make_response(render_template('service_dashboard.html', services=services_json), 200, headers)
+		return make_response(render_template('service_dashboard.html', services=services_json, title='Service Dashboard'), 200, headers)
 
 	def post(self):
 		# return request.form.getlist('protocol')
@@ -464,7 +464,9 @@ def google_hacking_dashboard():
 		'3': 'Database files exposed',
 		'4':'Log files exposed',
 		'5':'Backup and old files',
-		'6':'Login pages',
+		'6':'Login pages'
+	}
+	queries_2 = {
 		'7':'SQL errors',
 		'8':'Publicly exposed documents',
 		'9':'phpinfo()',
@@ -473,7 +475,7 @@ def google_hacking_dashboard():
 		'12':'Search Github.com and Gitlab.com',
 		'13':'Search Stackoverflow.com'
 	}
-	return render_template('google_hacking_dashboard.html', queries=queries)
+	return render_template('google_hacking_dashboard.html', queries=queries, queries_2=queries_2, title='Google Hacking Queries')
 
 
 

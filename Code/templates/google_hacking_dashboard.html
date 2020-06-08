@@ -1,109 +1,138 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Google Hacking Queries</title>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-</head>
-<body>
-	<h1>Dashboard</h1>
-	{% include 'menu.html' %}
-	<form action="" id="tool-form" novalidate="novalidate">
-		<label for="">Enter URL</label>
-		<input type="text" name="url" id="target">
-	</form>
+{% extends 'templates/template.html' %}
+{% block content %}
 
-	<!-- main queries -->
-	{% for id, query in queries.items() %}
-	<a href="/" target="_blank" id="pub_doc" onclick="do_google_search({{ id }})">{{ query }}</a>
-	<br>
-	{% endfor  %}
-<!-- 
-	<script type="text/javascript">
-		pub_doc_base = ""
-		$(document).ready(function(){
-			$("#url").change(function(){
-				//change href attribute of 
-				url = $("#url").val()
-				pub_doc = "/" + url
-				console.log(url)
-				$("#pub_doc").attr("href", pub_doc)
-			});
-		});
-		
-	</script> -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+		<div class="container-fluid">
+		  <div class="row mb-2">
+			<div class="col-sm-6">
+			  <h1 class="m-0 text-dark">Google Hacking Queries</h1>
+			</div><!-- /.col -->
+			<div class="col-sm-6">
+			  <ol class="breadcrumb float-sm-right">
+				<li class="breadcrumb-item"><a href="/">Home</a></li>
+				<li class="breadcrumb-item active">Google Hacking Queries</li>
+			  </ol>
+			</div><!-- /.col -->
+		  </div><!-- /.row -->
+		</div><!-- /.container-fluid -->
+	  </div>
+	  <!-- /.content-header -->
 
 
-<!-- pentest tools -->
-<script>
-	function do_google_search(type) 
-	{
-		/*if($('#tool-form').valid() == false) {
-			return;
-		}*/
-		
-		site = document.getElementById('target').value;
-		if (site.indexOf('://') > 0) {
-			site = site.substr(site.indexOf('://')+3);
-		}
-		if (site.indexOf('/') > 0) {
-			site = site.substr(0, site.indexOf('/'));
-		}
-		if (site.indexOf('?') > 0) {
-			site = site.substr(0, site.indexOf('?'));
-		}
-		if (site.indexOf('&') > 0) {
-			site = site.substr(0, site.indexOf('&'));
-		}
-		url = 'https://www.google.com/search?q=';
-		console.log('Site: ' + site)
-		switch(type)
+
+
+	
+	<div class="row">
+		<div class="col-lg-12">
+
+		<div class="card">
+		<div class="card-header border-0">
+			<h3 class="card-title">Enter URLs</h3>
+			<div class="input-group input-group-sm">
+				<input type="text" class="form-control" name="url" id='target'>
+				<span class="input-group-append">
+				  <button type="button" class="btn btn-info btn-flat">Search!</button>
+				</span>
+			  </div>
+		</div>
+		</div>
+		</div>
+	</div>
+
+
+
+	<div class="row">
+		<div class="col-lg-5 offset-md-1">
+			{% for id, query in queries.items() %}
+			<i class="fas fa-search"></i>
+			<a href="/" target="_blank" id="pub_doc" onclick="do_google_search({{ id }})">{{ query }}</a>
+			<br/>
+			{% endfor %}
+		</div>
+
+		<div class="col-lg-6">
+			{% for id, query in queries_2.items() %}
+			<i class="fas fa-search"></i>
+			<a href="/" target="_blank" id="pub_doc" onclick="do_google_search({{ id }})">{{ query }}</a>
+			<br/>
+			{% endfor %}
+		</div>
+
+	</div>
+	<!-- pentest tools -->
+	<script>
+		function do_google_search(type) 
 		{
-			case 1:
-				url += 'site:' + site + '+intitle:index.of';
-				break;
-			case 2:
-				url += 'site:' + site + '+ext:xml+|+ext:conf+|+ext:cnf+|+ext:reg+|+ext:inf+|+ext:rdp+|+ext:cfg+|+ext:txt+|+ext:ora+|+ext:ini+|+ext:env';
-				break;
-			case 3:
-				url += 'site:' + site + '+ext:sql+|+ext:dbf+|+ext:mdb';
-				break;
-			case 4:
-				url += 'site:' + site + '+ext:log';
-				break;
-			case 5:
-				url += 'site:' + site + '+ext:bkf+|+ext:bkp+|+ext:bak+|+ext:old+|+ext:backup';
-				break;
-			case 6:
-				url += 'site:' + site + '+inurl:login';
-				break;
-			case 7:
-				url += 'site:' + site + '+intext:"sql+syntax+near"+|+intext:"syntax+error+has+occurred"+|+intext:"incorrect+syntax+near"+|+intext:"unexpected+end+of+SQL+command"+|+intext:"Warning:+mysql_connect()"+|+intext:"Warning:+mysql_query()"+|+intext:"Warning:+pg_connect()"';
-				break;
-			case 8:
-				url += 'site:' + site + '+ext:doc+|+ext:docx+|+ext:odt+|+ext:rtf+|+ext:sxw+|+ext:psw+|+ext:ppt+|+ext:pptx+|+ext:pps+|+ext:csv';
-				break;
-			case 9:
-				url += 'site:' + site + '+ext:php+intitle:phpinfo+"published+by+the+PHP+Group"';
-				break;
-			case 10:
-				url += 'site:' + site + '+"PHP+Parse+error"+|+"PHP+Warning"+|+"PHP+Error"';
-				break;
-			case 11:
-				url += 'site:pastebin.com | site:paste2.org | site:pastehtml.com | site:slexy.org | site:snipplr.com | site:snipt.net | site:textsnip.com | site:bitpaste.app | site:justpaste.it | site:heypasteit.com | site:hastebin.com | site:dpaste.org | site:dpaste.com | site:codepad.org | site:jsitor.com | site:codepen.io | site:jsfiddle.net | site:dotnetfiddle.net | site:phpfiddle.org | site:ide.geeksforgeeks.org | site:repl.it | site:ideone.com | site:paste.debian.net | site:paste.org | site:paste.org.ru | site:codebeautify.org  | site:codeshare.io | site:trello.com "' + site + '"';
-				break;
-			case 12:
-				url += 'site:github.com | site:gitlab.com "' + site + '"';
-				break;
-			case 13:
-				url += 'site:stackoverflow.com "' + site + '"';
-				break;
-		}
-		window.open(url,'','scrollbars=yes,menubar=no,height=600,width=800,resizable=yes,toolbar=yes,menubar=no,location=no,status=no');
+			/*if($('#tool-form').valid() == false) {
+				return;
+			}*/
+			
+			site = document.getElementById('target').value;
+			if (site.indexOf('://') > 0) {
+				site = site.substr(site.indexOf('://')+3);
+			}
+			if (site.indexOf('/') > 0) {
+				site = site.substr(0, site.indexOf('/'));
+			}
+			if (site.indexOf('?') > 0) {
+				site = site.substr(0, site.indexOf('?'));
+			}
+			if (site.indexOf('&') > 0) {
+				site = site.substr(0, site.indexOf('&'));
+			}
+			url = 'https://www.google.com/search?q=';
+			console.log('Site: ' + site)
+			switch(type)
+			{
+				case 1:
+					url += 'site:' + site + '+intitle:index.of';
+					break;
+				case 2:
+					url += 'site:' + site + '+ext:xml+|+ext:conf+|+ext:cnf+|+ext:reg+|+ext:inf+|+ext:rdp+|+ext:cfg+|+ext:txt+|+ext:ora+|+ext:ini+|+ext:env';
+					break;
+				case 3:
+					url += 'site:' + site + '+ext:sql+|+ext:dbf+|+ext:mdb';
+					break;
+				case 4:
+					url += 'site:' + site + '+ext:log';
+					break;
+				case 5:
+					url += 'site:' + site + '+ext:bkf+|+ext:bkp+|+ext:bak+|+ext:old+|+ext:backup';
+					break;
+				case 6:
+					url += 'site:' + site + '+inurl:login';
+					break;
+				case 7:
+					url += 'site:' + site + '+intext:"sql+syntax+near"+|+intext:"syntax+error+has+occurred"+|+intext:"incorrect+syntax+near"+|+intext:"unexpected+end+of+SQL+command"+|+intext:"Warning:+mysql_connect()"+|+intext:"Warning:+mysql_query()"+|+intext:"Warning:+pg_connect()"';
+					break;
+				case 8:
+					url += 'site:' + site + '+ext:doc+|+ext:docx+|+ext:odt+|+ext:rtf+|+ext:sxw+|+ext:psw+|+ext:ppt+|+ext:pptx+|+ext:pps+|+ext:csv';
+					break;
+				case 9:
+					url += 'site:' + site + '+ext:php+intitle:phpinfo+"published+by+the+PHP+Group"';
+					break;
+				case 10:
+					url += 'site:' + site + '+"PHP+Parse+error"+|+"PHP+Warning"+|+"PHP+Error"';
+					break;
+				case 11:
+					url += 'site:pastebin.com | site:paste2.org | site:pastehtml.com | site:slexy.org | site:snipplr.com | site:snipt.net | site:textsnip.com | site:bitpaste.app | site:justpaste.it | site:heypasteit.com | site:hastebin.com | site:dpaste.org | site:dpaste.com | site:codepad.org | site:jsitor.com | site:codepen.io | site:jsfiddle.net | site:dotnetfiddle.net | site:phpfiddle.org | site:ide.geeksforgeeks.org | site:repl.it | site:ideone.com | site:paste.debian.net | site:paste.org | site:paste.org.ru | site:codebeautify.org  | site:codeshare.io | site:trello.com "' + site + '"';
+					break;
+				case 12:
+					url += 'site:github.com | site:gitlab.com "' + site + '"';
+					break;
+				case 13:
+					url += 'site:stackoverflow.com "' + site + '"';
+					break;
+			}
+			window.open(url,'','scrollbars=yes,menubar=no,height=600,width=800,resizable=yes,toolbar=yes,menubar=no,location=no,status=no');
 
-		// log
-		var img = new Image();
-		img.src = '/?p=tool_exec&tool=google_hacking&site='+site+'&type='+type;
-	}
-</script>
-</body>
-</html>
+			// log
+			var img = new Image();
+			img.src = '/?p=tool_exec&tool=google_hacking&site='+site+'&type='+type;
+		}
+	</script>
+		
+</div>
+{% endblock %}

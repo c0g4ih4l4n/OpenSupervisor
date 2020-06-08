@@ -2,52 +2,258 @@
 {% block content %}
 <div class="content-wrapper">
 
-    <h1>{{ ip['ip'] }} Detail</h1>
-    IP information:
-    <div>
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+          <div class="row mb-2">
+            <div class="col-sm-6">
+              <h1>IP Detail</h1>
+            </div>
+            <div class="col-sm-6">
+              <ol class="breadcrumb float-sm-right">
+                <li class="breadcrumb-item"><a href="#">Home</a></li>
+                <li class="breadcrumb-item active">IP Detail</li>
+              </ol>
+            </div>
+          </div>
+        </div><!-- /.container-fluid -->
+      </section>
 
-        IP: {{ ip['ip'] }}
-        <br>
-        Whois data: {{ ip['whois'] }}
-        <br>
-        Status: {{ ip['status'] }}
 
-        <br>
-        {% if 'scan' in ip and ip['ip'] in ip['scan'] %}
-        Hostname: {{ ip['scan'][ip['ip']]['hostnames'][0]['name'] }}
-        {% else %}
-        Hostname: Not Found
-        {% endif %}
-        <br>
-        OS: {% if 'scan' in ip and 'osmatch' in ip['scan'][ip['ip']] %}
-        {{ ip['scan'][ip['ip']]['osmatch'][0]['name'] }} Accurate: {{ ip['scan'][ip['ip']]['osmatch'][0]['accuracy'] }} %
-        <br>
-        CPE: {{ ip['scan'][ip['ip']]['osmatch'][0]['osclass'][0]['cpe'] }}
-        {% endif %}
-        <br>
+      <section class="content">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-12">
+              <div class="callout callout-info">
+                <h5><i class="fas fa-info"></i> Note:</h5>
+                This page has been enhanced for printing. Click the print button at the bottom of the invoice to test.
+              </div>
+  
+  
+              <!-- Main content -->
+              <div class="invoice p-3 mb-3">
+                <!-- title row -->
+                <div class="row">
+                  <div class="col-12">
+                    <h4>
+                      <i class="fas fa-globe"></i> {{ ip['ip'] }}.
+                      <small class="float-right">Date: 02/06/2020</small>
+                    </h4>
+                  </div>
+                  <!-- /.col -->
+                </div>
 
-        <br/>
-        <h4>Host Script Result:</h4>
-        <table border="1px">
-            <tr>
-                <th>ID</th>
-                <th>Output</th>
-            </tr>
-            {% if 'scan' in ip %}
-            {% for script in  ip['scan'][ip['ip']]['hostscript']%}
-            <tr>
-                <td>{{ script['id'] }}</td>
-                <td>{{ script['output'] }}</td>
-            </tr>
-            {% endfor %}
-            {% endif %}
-        </table>
-        
-        <div>Full Port Scan: <a href="{{ url_for('full_port_scan', ip=ip['ip']) }}">Launch</a></div>
-        <div>Vulner Scan: <a href="{{ url_for('vuln_script_scan', ip=ip['ip']) }}">Launch</a></div>
+                {% if 'scan' in ip %}
+                <div class="row">
+                    <h4><small>Hostname: {{ ip['scan'][ip['ip']]['hostnames'][0]['name'] }}</small></h4><br>
+                    {% if 'scan' in ip and 'osmatch' in ip['scan'][ip['ip']] %}
+                    <h4><small>OS: {{ ip['scan'][ip['ip']]['osmatch'][0]['name'] }} Accurate: {{ ip['scan'][ip['ip']]['osmatch'][0]['accuracy'] }} % </small></h4>
+                    <br>
+                    <h4><small>CPE: {{ ip['scan'][ip['ip']]['osmatch'][0]['osclass'][0]['cpe'] }}</small></h4>
+                    {% endif %}
+                </div>
+                {% endif %}
 
-    </div>
-    <br>
+
+                <!-- info row -->
+                <div class='row'>
+                    <h4>
+                        <small>Whois Data</small>
+                    </h4>
+                </div>
+                <div class="row invoice-info">
+                  <div class="col-sm-4 invoice-col">
+                    <address>
+                      Nir: {{ ip['whois']['nir'] }}<br>
+                      ASN Registry: {{ ip['whois']['asn_registry'] }}<br>
+                      ASN: {{ ip['whois']['asn'] }}<br>
+                      ASN CIDR: {{ ip['whois']['asn_cidr'] }}<br>
+                    </address>
+                  </div>
+                  <!-- /.col -->
+                  <div class="col-sm-4 invoice-col">
+                    <address>
+                      ASN Country Code: {{ ip['whois']['asn_country_code'] }}<br>
+                      ASN Date: {{ ip['whois']['asn_date'] }}<br>
+                      ASN Description: {{ ip['whois']['asn_description'] }}<br>
+                      795 Folsom Ave, Suite 600<br>
+                    </address>
+                  </div>
+                  <!-- /.col -->
+                  <div class="col-sm-4 invoice-col">
+                    <address>
+                      Raw: {{ ip['whois']['raw'] }}<br>
+                      Referal: {{ ip['whois']['referral'] }}<br>
+                      Raw Referal: {{ ip['whois']['raw_referral'] }}<br>
+                    </address>
+                  </div>
+                  <!-- /.col -->
+                </div>
+                <!-- /.row -->
+                <div class='row'>
+                    <h5>
+                        <small>Net Block</small>
+                    </h5>
+                </div>
+                <!-- Table row -->
+                <div class="row">
+
+                  <div class="col-12 table-responsive">
+                    <table class="table table-striped">
+                      <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>CIDR</th>
+                        <th>Name</th>
+                        <th>Handle</th>
+                        <th>Range</th>
+                        <th>Description</th>
+                        <th>Country</th>
+                        <th>State</th>
+                        <th>City</th>
+                        <th>Address</th>
+                        <th>Postal Code</th>
+                        <th>Created</th>
+                        <th>Updated</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      {% for n in ip['whois']['nets'] %}
+                      <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ n['cidr'] }}</td>
+                        <td>{{ n['name'] }}</td>
+                        <td>{{ n['handle'] }}</td>
+                        <td>{{ n['range'] }}</td>
+                        <td>{{ n['description'] }}</td>
+                        <td>{{ n['country'] }}</td>
+                        <td>{{ n['state'] }}</td>
+                        <td>{{ n['city'] }}</td>
+                        <td>{{ n['address'] }}</td>
+                        <td>{{ n['postal_code'] }}</td>
+                        <td>{{ n['created'] }}</td>
+                        <td>{{ n['updated'] }}</td>
+                      </tr>
+                      {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                  <!-- /.col -->
+                </div>
+                <!-- /.row -->
+
+                <div class='row'>
+                    <h4>
+                        <small>Host Script Result</small>
+                    </h4>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 table-responsive">
+                        {% if 'scan' in ip %}
+                        <table class="table table-striped">
+                          <thead>
+                          <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Output</th>
+                          </tr>
+                          </thead>
+                          <tbody>
+                          {% for s in ip['scan'][ip['ip']['hostscript']] %}
+                          <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ s['id'] }}</td>
+                            <td>{{ s['output'] }}</td>
+                          {% endfor %}
+                          </tbody>
+                        </table>
+                        {% endif %}
+                      </div>
+                </div>
+
+                <div>Full Port Scan: <a href="{{ url_for('full_port_scan', ip=ip['ip']) }}">Launch</a></div>
+                <div>Vulner Scan: <a href="{{ url_for('vuln_script_scan', ip=ip['ip']) }}">Launch</a></div>
+
+                <div class='row'>
+                    <h4>
+                        <small>Ports</small>
+                    </h4>
+                </div>
+
+
+                <div class="row">
+                    <div class="col-12 table-responsive">
+                        {% if 'scan' in ip %}
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Screenshot</th>
+                                <th>Port</th>
+                                <th>Type</th>
+                                <th>State</th>
+                                <th>Service</th>
+                                <th>Product Version</th>
+                                <th>Reason</th>
+                                <th>Edit</th>
+                                <th>Delete</th>
+                                <th>View</th>
+                                <th>Vuln Scan</th>
+                                <th>Script Result</th>
+                                <th>Technology</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% if 'scan' in ip and ip['ip'] in ip['scan'] %}
+                            {% for port, service in ip['scan'][ip['ip']]['tcp'].items() %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td><img src="/images/{{ service['screenshot'] }}" alt="" width="50px"></td>
+                                <td><a href="">{{ port }}</a></td>
+                                <td>TCP</td>
+                                <td>{{ service['state'] }}</td>
+                                <td>{{ service['name'] }}</td>
+                                <td>{{ service['product'] + ' ' + service['version'] }}</td>
+                                <td>{{ service['reason'] }}</td>
+                                <td><a href="{{ url_for('test') }}">Edit</a></td>
+                                <td><form action="{{ url_for('test') }}" method="POST">
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <input type="submit" value="Delete">
+                                </form></td>
+                                <!-- <td><a href="{{ url_for('test') }}">Scan</a></td> -->
+                    
+                                <td><a href="{{ url_for('test') }}">View</a></td>
+                                <td><a href="{{ url_for('test') }}">Vuln Scan</a></td>
+                                <td>
+                                    <!-- {{ service['script'] }} -->
+                                    {% if 'script' in service %}
+                                    {% for n, s in service['script'].items() %}
+                                    <div class="callout callout-info">
+                                        <p><strong>{{ n }}</strong>: {{ s }}</p>
+
+                                    </div>
+                                        
+                                    {% endfor %}
+                                    {% endif %}
+                                </td>
+                                <td>{{ service['technology'] }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% endif %}
+                            </tbody>
+                        </table>
+                        {% endif %}
+                      </div>
+                </div>
+
+                <a href="{{ url_for('script_scan', ip=ip['ip']) }}">Default Script Scan</a>
+                <br>
+                <a href="{{ url_for('create_ip') }}">Create new one</a>
+        </div><!-- /.container-fluid -->
+      </section>
+
+
 
     <div>
         Scan scripts:
@@ -78,56 +284,6 @@
                 <input type="submit" value="Scan">
             </form>
     </div>
-
-
-    <!-- nmap result -->
-	<h3>List Ports:</h3>
-	<table border="1px">
-		<tr>
-			<th>ID</th>
-            <th>Screenshot</th>
-            <th>Port</th>
-            <th>Type</th>
-            <th>State</th>
-            <th>Service</th>
-            <th>Product Version</th>
-            <th>Reason</th>
-			<th>Edit</th>
-			<th>Delete</th>
-            <th>View</th>
-            <th>Vuln Scan</th>
-            <th>Script Result</th>
-            <th>Technology</th>
-        </tr>
-        {% if 'scan' in ip and ip['ip'] in ip['scan'] %}
-		{% for port, service in ip['scan'][ip['ip']]['tcp'].items() %}
-		<tr>
-            <td>{{ loop.index }}</td>
-            <td><img src="/images/{{ service['screenshot'] }}" alt="" width="50px"></td>
-			<td><a href="">{{ port }}</a></td>
-			<td>TCP</td>
-            <td>{{ service['state'] }}</td>
-			<td>{{ service['name'] }}</td>
-			<td>{{ service['product'] + ' ' + service['version'] }}</td>
-			<td>{{ service['reason'] }}</td>
-			<td><a href="{{ url_for('test') }}">Edit</a></td>
-			<td><form action="{{ url_for('test') }}" method="POST">
-				<input type="hidden" name="_method" value="DELETE">
-				<input type="submit" value="Delete">
-			</form></td>
-			<!-- <td><a href="{{ url_for('test') }}">Scan</a></td> -->
-
-            <td><a href="{{ url_for('test') }}">View</a></td>
-            <td><a href="{{ url_for('test') }}">Vuln Scan</a></td>
-            <td>{{ service['script'] }}</td>
-            <td>{{ service['technology'] }}</td>
-		</tr>
-        {% endfor %}
-        {% endif %}
-    </table>
-    <a href="{{ url_for('script_scan', ip=ip['ip']) }}">Default Script Scan</a>
-    <br>
-	<a href="{{ url_for('create_ip') }}">Create new one</a>
 
 </div>
 

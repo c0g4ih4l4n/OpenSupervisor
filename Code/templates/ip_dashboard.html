@@ -7,12 +7,12 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1 class="m-0 text-dark">Domain Dashboard</h1>
+            <h1 class="m-0 text-dark">IP Dashboard</h1>
           </div><!-- /.col -->
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">Domain Dashboard</li>
+              <li class="breadcrumb-item active">IP Dashboard</li>
             </ol>
           </div><!-- /.col -->
         </div><!-- /.row -->
@@ -28,7 +28,7 @@
 
             <div class="card">
               <div class="card-header border-0">
-                <h3 class="card-title">Domains</h3>
+                <h3 class="card-title">IPs</h3>
                 <div class="card-tools">
 					
 				  <!-- link for export as csv -->
@@ -49,11 +49,10 @@
 		<tr>
 			<th>ID</th>
 			<th>IP</th>
-			<th>WHOIS Data</th>
+			<th>ASN Description</th>
 			<th>Status</th>
 			<th>Hostname</th>
 			<th>TCP Port</th>
-			<th>Nmap Result</th>
 			<th>Edit</th>
 			<th>Delete</th>
 			<th>Port Scan</th>
@@ -67,19 +66,36 @@
 		<tr>
 			<td>{{ loop.index }}</td>
 			<td><a href="">{{ ip['ip'] }}</a></td>
-			<td>{{ ip['whois'] }}</td>
+			<td>{{ ip['whois']['asn_description'] }}</td>
 			{% if ip['status'] == 1 %}
 			<td>Active</td>
 			{% else %}
 			<td>Down</td>
 			{% endif %}
 			<td>{{ ip['hostnames'] }}</td>
-			{% if 'scan' in ip and ip['ip'] in ip['scan'] %}
-			<td>{{ ip['scan'][ip['ip']]['tcp'] }}</td>
+      {% if 'scan' in ip and ip['ip'] in ip['scan'] %}
+      <!-- tcp port, state, name, product + version -->
+			<td>
+        <!-- {{ ip['scan'][ip['ip']]['tcp'] }} -->
+        {% for p, s in ip['scan'][ip['ip']]['tcp'].items() %}
+        {% if s['state'] == 'open' %}
+        <div class="callout callout-success">
+        {% elif s['state'] == 'closed' %}
+        <div class="callout callout-danger">
+        {% elif s['state'] == 'filtered' %}
+        <div class="callout callout-warning">
+        {% else %}
+        <div class="callout callout-info">
+        {% endif %}
+        
+          <p>{{ p + ': ' + s['state'] + ' ' + s['name'] + ' ' + s['product'] + ' ' + s['version'] }}</p>
+
+        </div>
+        {% endfor %}
+      </td>
 			{% else %}
 			<td>No Result</td>
 			{% endif %}
-			<td>{{ ip[''] }}</td>
 			<td><a href="{{ url_for('edit_ip', ip=ip['ip']) }}">Edit</a></td>
 			<td><form action="{{ url_for('api.ip', ip=ip['ip']) }}" method="POST">
 				<input type="hidden" name="_method" value="DELETE">
