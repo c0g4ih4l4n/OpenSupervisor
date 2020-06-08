@@ -4,6 +4,9 @@ from flask import *
 from flask_restful import Resource, Api
 from flask_pymongo import PyMongo
 import pymongo
+from flask_mongoengine import MongoEngine
+from flask_security import Security, MongoEngineUserDatastore, \
+    UserMixin, RoleMixin, login_required
 
 import socket
 import urllib
@@ -68,8 +71,50 @@ celery = make_celery(app)
 
 # JINJA_ENVIRONMENT.globals['STATIC_PREFIX'] = '/static/'
 
+# MongoDB Config
+app.config['MONGODB_DB'] = 'ThesisDB'
+app.config['MONGODB_HOST'] = '192.168.33.10'
+app.config['MONGODB_PORT'] = 27017
+app.config['MONGODB_USERNAME'] = mongo_user
+app.config['MONGODB_PASSWORD'] = mongo_password
+app.config['SECURITY_PASSWORD_SALT'] = '!@#(ASDJZ)'
 
+# Create database connection object
+db_login = MongoEngine(app)
 
+class Role(db_login.Document, RoleMixin):
+    name = db_login.StringField(max_length=80, unique=True)
+    description = db_login.StringField(max_length=255)
+
+class User(db_login.Document, UserMixin):
+    email = db_login.StringField(max_length=255)
+    password = db_login.StringField(max_length=255)
+    active = db_login.BooleanField(default=True)
+    confirmed_at = db_login.DateTimeField()
+    roles = db_login.ListField(db_login.ReferenceField(Role), default=[])
+
+# Setup Flask-Security
+user_datastore = MongoEngineUserDatastore(db, User, Role)
+security = Security(app, user_datastore)
+
+# Create a user to test with
+@app.before_first_request
+def create_user():
+    user_datastore.create_user(email='miracle@dragon.com', password='1')
+
+@app.before_request
+@login_required
+def before_request():
+	pass
+# @app.before_request
+# def check_valid_login():
+#     login_valid = 'user' in session # or whatever you use to check valid login
+
+#     if (request.endpoint and 
+#         'static' not in request.endpoint and 
+#         not login_valid and 
+#         not getattr(app.view_functions[request.endpoint], 'is_public', False) ) :
+#         return render_template('login.html', next=request.endpoint)
 
 # Domain
 class DomainListAPI(Resource):
@@ -321,6 +366,7 @@ def set_subdomain_scan_schedule(domain):
 	my_jobs.write()
 
 @app.route('/')
+@login_required
 def home():
 	return render_template('home_page.html', title="Dragon Scanner", page_title='Home Page')
 
@@ -619,11 +665,17 @@ def burp_scan(url):
 	burp_clt.insert_one({'url': url, 'task_id': task_id})
 	return
 
+
+
+
+
+
+
+
 @app.route('/test/', methods=['POST', 'GET'])
+@login_required
 def test():
-	target = '192.168.33.1'
-	ovas.luanch_simple_scanner(target)
-	return
+	return 'OK'
 
 @app.route('/images/screenshots/<path:path>')
 def send_images(path):

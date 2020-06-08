@@ -3,6 +3,8 @@ db: ThesisDB
 
 app credentials: admin_db/long@2020
 
+app: miracle@dragon.com/1
+
 db.createUser({
       user: "admin",
       pwd: "long@2020",
