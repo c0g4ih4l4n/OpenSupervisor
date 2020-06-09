@@ -1,19 +1,38 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Service Dashboard</title>
-</head>
-<body>
-	<h1>Service Dashboard</h1>
-	<h3>Create new Service</h3>
-	<form action="{{ url_for('api.services') }}" method="POST">
-		<label>Service name</label>
-		<input type="text" name="service_name">
-		<br>
+{% extends 'templates/template.html' %}
+{% block content %}
+	<div class="content-wrapper">
+	<div class="row">
+		<div class="card card-warning">
+			<div class="card-header">
+				<h3 class="card-title">Create new Service</h3>
+			</div>
+		<div class="card-body">
 
-		<label>Description</label>
-		<input type="text" name="description">
-		<br>
+
+	<form action="{{ url_for('api.services') }}" method="POST">
+
+
+		<div class="row">
+			<div class="col-sm-12">
+			<div class="form-group">
+				<label>Service name</label>
+				<input name="service_name" type="text" class="form-control" placeholder="Enter ...">
+			</div>
+			</div>
+		</div>
+
+
+		
+		<div class="row">
+			<div class="col-sm-12">
+			<div class="form-group">
+				<label>Description</label>
+				<input name="description" type="text" class="form-control" placeholder="Enter ...">
+			</div>
+			</div>
+		</div>
+
+
 
 		<label>Protocol</label>
         <div>
@@ -32,11 +51,18 @@
         <input type="radio" value="0" name="tls">No
         <br>
 
-		<label>Common Port</label>
-		<input type="text" name="common_port">
-		<br>
+		
+		<div class="row">
+			<div class="col-sm-12">
+			<div class="form-group">
+				<label>Common Port</label>
+				<input name="common_port" type="text" class="form-control" placeholder="Enter ...">
+			</div>
+			</div>
+		</div>
 
 		<input type="submit" value="Create">
 	</form>
-</body>
-</html>
+	
+	
+{% endblock %}

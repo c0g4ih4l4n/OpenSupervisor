@@ -1,18 +1,35 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Subdomain Dashboard</title>
-</head>
-<body>
-	<h1>IP Dashboard</h1>
-	<h3>Create new ip targets</h3>
+{% extends 'templates/template.html' %}
+{% block content %}
+	<div class="content-wrapper">
+	<div class="row">
+		<div class="card card-warning">
+			<div class="card-header">
+				<h3 class="card-title">Create new IP targets</h3>
+			</div>
+		<div class="card-body">
+
 	<form action="{{ url_for('api.ips') }}" method="POST">
-		<label>IP</label>
-		<input type="text" name="ip">
-		<br>
-		<label>Organization Name</label>
-		<input type="text" name="org_name">
-		<br>
+
+
+		<div class="row">
+			<div class="col-sm-12">
+			<div class="form-group">
+				<label>IP</label>
+				<input name="ip" type="text" class="form-control" placeholder="Enter ...">
+			</div>
+			</div>
+		</div>
+
+
+		<div class="row">
+			<div class="col-sm-12">
+			<div class="form-group">
+				<label>Organization Name</label>
+				<input name="org_name" type="text" class="form-control" placeholder="Enter ...">
+			</div>
+			</div>
+		</div>
+
 		<label for="bruteforce-option">Brute Force</label>
 		<br>
 		<label for="">Yes</label>
@@ -22,5 +39,5 @@
 		<br>
 		<input type="submit" value="Create">
 	</form>
-</body>
-</html>
+
+{% endblock %}

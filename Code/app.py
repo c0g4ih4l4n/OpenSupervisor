@@ -388,7 +388,7 @@ def target_dashboard():
 
 @app.route('/targets/create')
 def create_domain():
-	return render_template('domain_create.html')
+	return render_template('domain_create.html', title='Adding Domain')
 
 
 @app.route('/targets/<string:domain_name>/edit')
