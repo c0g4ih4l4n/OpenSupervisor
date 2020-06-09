@@ -395,7 +395,7 @@ def create_domain():
 def edit_domain(domain_name):
 	# get domain entity for 
 	domain_entity = dm_clt.find_one({'domain_name': domain_name})
-	return render_template('targets_edit.html', edited_domain=domain_entity)
+	return render_template('targets_edit.html', edited_domain=domain_entity, title='Edit Target')
 
 
 @app.route('/targets/<string:domain_name>/scan')
@@ -444,8 +444,8 @@ def create_ip():
 	return render_template('ip_create.html')
 
 @app.route('/ips/<string:ip>/edit')
-def edit_ip():
-	return
+def edit_ip(ip):
+	return ip
 
 
 @app.route('/ips/<string:ip>/scan')
@@ -500,7 +500,8 @@ def create_vuln():
 def edit_vuln(vuln_id):
 	# get vuln in db
 	vuln_entity = vuln_clt.find_one({'_id': ObjectId(vuln_id)})
-	return render_template("edit_vuln.html", vuln=vuln_entity)
+	services = service_clt.find({})
+	return render_template("vuln_edit.html", vuln=vuln_entity, services=services, title='Edit Vulnerability')
 
 @app.route('/google_hacking_dashboard')
 def google_hacking_dashboard():

@@ -73,15 +73,15 @@
 						<td><a href="{{ url_for('edit_domain', domain_name=domain['domain_name']) }}">Edit</a></td>
 						<td><form action="{{ url_for('api.subdomain', domain_name=domain['domain_name']) }}" method="POST">
 							<input type="hidden" name="_method" value="DELETE">
-							<input type="submit" value="Delete">
+							<input class="btn btn-block btn-danger btn-xs" class="btn btn-block btn-danger btn-xs" type="submit" value="Delete">
 						</form></td>
 						{% if domain %}
-						<td><a href="{{ url_for('subdomain_enumeration', domain_name=domain['domain_name']) }}">Scan</a></td>
+						<td><a class="btn btn-block btn-info btn-xs" href="{{ url_for('subdomain_enumeration', domain_name=domain['domain_name']) }}">Scan</a></td>
 			
 						{% else %}
 						<td></td>
 						{% endif %}
-						<td><a href="{{ url_for('api.subdomain', domain_name=domain['domain_name']) }}">View</a></td>
+						<td><a class="btn btn-block btn-primary btn-xs" href="{{ url_for('api.subdomain', domain_name=domain['domain_name']) }}">View</a></td>
 			
 						<td>{{ domain['task_status'] }}</td>
 						<td>{{ domain['subdomain_enum_task_id'] }}</td>

@@ -1,20 +1,36 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Service Dashboard</title>
-</head>
-<body>
-	<h1>Service Dashboard</h1>
-	<h3>Edit Service</h3>
+{% extends 'templates/template.html' %}
+{% block content %}
+	<div class="content-wrapper">
+	<div class="row">
+		<div class="card card-warning">
+			<div class="card-header">
+				<h3 class="card-title">Service Edit</h3>
+			</div>
+		<div class="card-body">
+
 	<form action="{{ url_for('api.service', service_id=service['_id']) }}" method="POST">
         <input type="text" hidden name="_method" value="PUT">
-		<label>Service name</label>
-		<input type="text" name="service_name" value="{{ service['service_name'] }}">
-		<br>
 
-		<label>Description</label>
-		<input type="text" name="description" value="{{ service['description'] }}">
-		<br>
+		<div class="row">
+			<div class="col-sm-12">
+			<div class="form-group">
+				<label>Service name</label>
+				<input name="service_name" type="text" class="form-control" placeholder="Enter ..." value="{{ service['service_name'] }}">
+			</div>
+			</div>
+		</div>
+
+
+		
+		<div class="row">
+			<div class="col-sm-12">
+			<div class="form-group">
+				<label>Description</label>
+				<input name="description" type="text" class="form-control" placeholder="Enter ..." value="{{ service['description'] }}">
+			</div>
+			</div>
+		</div>
+
 
 		<label>Protocol</label>
         <div>
@@ -24,9 +40,10 @@
         </div>
 
         <div>
-        <input type="checkbox" id="udp" name="protocol" value='udp' {% if 'udp' in service['protocol'] %} checked {% endif %}>
-        <label for="udp">UDP</label>
+            <input type="checkbox" id="udp" name="protocol" value='udp' {% if 'udp' in service['protocol'] %} checked {% endif %}>
+            <label for="udp">UDP</label>
         </div>
+
 
         <label for="">TLS</label>
         {% if ("tls" in service and service['tls'] == "1") %}
@@ -41,11 +58,22 @@
         {% endif %}
         <br>
 
-		<label>Common Port</label>
-		<input type="text" name="common_port" value="{{ service['common_port'] }}">
-		<br>
+		
+		<div class="row">
+			<div class="col-sm-12">
+			<div class="form-group">
+				<label>Common Port</label>
+				<input name="common_port" type="text" class="form-control" placeholder="Enter ..." value="{{ service['common_port'] }}">
+			</div>
+			</div>
+		</div>
 
 		<input type="submit" value="Update">
 	</form>
-</body>
-</html>
+
+    </div>
+    </div>
+    </div>
+	</div>
+
+{% endblock %}

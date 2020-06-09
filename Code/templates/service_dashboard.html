@@ -70,7 +70,7 @@
 			<td><a href="{{ url_for('edit_service', service_id=s['_id']) }}">Edit</a></td>
 			<td><form action="{{ url_for('api.service', service_id=s['_id']) }}" method="POST">
 				<input type="hidden" name="_method" value="DELETE">
-				<input type="submit" value="Delete">
+				<input class="btn btn-block btn-danger btn-xs" type="submit" value="Delete">
 			</form></td>
 		</tr>
 		{% endfor %}

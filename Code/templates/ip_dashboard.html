@@ -103,15 +103,15 @@
 			<td><a href="{{ url_for('edit_ip', ip=ip['ip']) }}">Edit</a></td>
 			<td><form action="{{ url_for('api.ip', ip=ip['ip']) }}" method="POST">
 				<input type="hidden" name="_method" value="DELETE">
-				<input type="submit" value="Delete">
+				<input class="btn btn-block btn-danger btn-xs" type="submit" value="Delete">
 			</form></td>
 			{% if ip %}
-			<td><a href="{{ url_for('ip_scan', ip=ip['ip']) }}">Scan</a></td>
+			<td><a class="btn btn-block btn-info btn-xs" href="{{ url_for('ip_scan', ip=ip['ip']) }}">Scan</a></td>
 
 			{% else %}
 			<td></td>
 			{% endif %}
-			<td><a href="{{ url_for('api.ip', ip=ip['ip']) }}">View</a></td>
+			<td><a class="btn btn-block btn-primary btn-xs" href="{{ url_for('api.ip', ip=ip['ip']) }}">View</a></td>
 
 			<td>{{ ip['task_status'] }}</td>
 			<td>{{ ip['port_scan_task_id'] }}</td>

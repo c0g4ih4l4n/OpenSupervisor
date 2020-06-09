@@ -4,11 +4,12 @@
 	<div class="row">
 		<div class="card card-warning">
 			<div class="card-header">
-				<h3 class="card-title">Create new Vulnerability</h3>
+				<h3 class="card-title">Edit Vulnerability</h3>
 			</div>
 		<div class="card-body">
 
-	<form action="{{ url_for('api.vulns') }}" method="POST">
+	<form action="{{ url_for('api.vuln', vuln_id=vuln['_id']) }}" method="POST">
+		<input type="text" hidden name='_method' value="PUT">
 
 
 		<div class="row">
@@ -18,7 +19,11 @@
 			<label>Service</label>
 			<select name="service" id="service" class="form-control">
 				{% for service in services %}
+				{% if service['service_name'] == vuln['service'] %}
+				<option value="{{ service['service_name'] }}" selected="selected">{{ service['service_name'] }}</option>
+				{% else %}
 				<option value="{{ service['service_name'] }}">{{ service['service_name'] }}</option>
+				{% endif %}
 				{% endfor %}
 			</select>
 			</div>
@@ -26,11 +31,12 @@
 		</div>
 
 
+
 		<div class="row">
 			<div class="col-sm-12">
 			<div class="form-group">
 				<label>Vuln Name</label>
-				<input name="vuln_name" type="text" class="form-control" placeholder="Enter ...">
+				<input name="vuln_name" type="text" class="form-control" placeholder="Enter ..." value="{{ vuln['vuln_name'] }}">
 			</div>
 			</div>
 		</div>
@@ -39,7 +45,7 @@
 			<div class="col-sm-12">
 			<div class="form-group">
 				<label>Product</label>
-				<input name="product" type="text" class="form-control" placeholder="Enter ...">
+				<input name="product" type="text" class="form-control" placeholder="Enter ..." value="{{ vuln['product'] }}">
 			</div>
 			</div>
 		</div>
@@ -48,7 +54,7 @@
 			<div class="col-sm-12">
 			<div class="form-group">
 				<label>Version</label>
-				<input name="version" type="text" class="form-control" placeholder="Enter ...">
+				<input name="version" type="text" class="form-control" placeholder="Enter ..." value="{{ vuln['version'] }}">
 			</div>
 			</div>
 		</div>
@@ -58,7 +64,7 @@
 			<div class="col-sm-12">
 			<div class="form-group">
 				<label>Script</label>
-				<input name="script" type="text" class="form-control" placeholder="Enter ...">
+				<input name="script" type="text" class="form-control" placeholder="Enter ..." value="{{ vuln['script'] }}">
 			</div>
 			</div>
 		</div>
@@ -68,7 +74,7 @@
 			<div class="col-sm-12">
 			<div class="form-group">
 				<label>Detail</label>
-				<input name="detail" type="text" class="form-control" placeholder="Enter ...">
+				<input name="detail" type="text" class="form-control" placeholder="Enter ..." value="{{ vuln['detail'] }}">
 			</div>
 			</div>
 		</div>
@@ -78,21 +84,28 @@
 			<div class="col-sm-12">
 			<div class="form-group">
 				<label>Mitigation Methods</label>
-				<input name="mitigation_methods" type="text" class="form-control" placeholder="Enter ...">
+				<input name="mitigation_methods" type="text" class="form-control" placeholder="Enter ..." value="{{ vuln['mitigation_methods'] }}">
 			</div>
 			</div>
 		</div>
 
-
 		<label for="available_exploit">Available Exploit</label>
 		<br>
+		{% if vuln['available_exploit'] %}
 		<label for="">Yes</label>
-		<input type="radio" name="available_exploit" value="yes">
+		<input type="radio" name="available_exploit" value="yes" checked>
 		<label for="">No</label>
 		<input type="radio" name="available_exploit" value="no">
 		<br>
 
-		<input type="submit" value="Create">
+		{% else %}
+		<label for="">Yes</label>
+		<input type="radio" name="available_exploit" value="yes" >
+		<label for="">No</label>
+		<input type="radio" name="available_exploit" value="no" hecked>
+		<br>
+		{% endif %}
+		<input type="submit" value="Update">
 	</form>
 
-	{% endblock %}
+{% endblock %}

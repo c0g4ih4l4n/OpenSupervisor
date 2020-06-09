@@ -75,7 +75,7 @@
 							<td><a href="{{ url_for('edit_vuln', vuln_id=vuln['_id']) }}">Edit</a></td>
 							<td><form action="{{ url_for('api.vuln', vuln_id=vuln['_id']) }}" method="POST">
 								<input type="hidden" name="_method" value="DELETE">
-								<input type="submit" value="Delete">
+								<input class="btn btn-block btn-danger btn-xs" type="submit" value="Delete">
 							</form></td>
 						</tr>
 						{% endfor %}
