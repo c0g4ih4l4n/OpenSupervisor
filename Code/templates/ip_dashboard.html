@@ -65,7 +65,7 @@
 		{% for ip in ips %}
 		<tr>
 			<td>{{ loop.index }}</td>
-			<td><a href="">{{ ip['ip'] }}</a></td>
+			<td><a href="{{ url_for('api.ip', ip=ip['ip']) }}">{{ ip['ip'] }}</a></td>
       {% if 'whois' in ip %}
 			<td>{{ ip['whois']['asn_description'] }}</td>
       {% else %}
@@ -127,7 +127,9 @@
           <!-- <div class="col-lg-6"></div> -->
         </div>
 		<!-- /.row -->
-	<a href="{{ url_for('create_ip') }}">Create new one</a>
+  <a href="{{ url_for('create_ip') }}">Create new one</a>
+  <br>
+	<a href="{{ url_for('screenshot') }}">Take screenshot of all HTTP services</a>
 		
       </div>
       <!-- /.container-fluid -->

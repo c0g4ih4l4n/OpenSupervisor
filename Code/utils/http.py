@@ -15,10 +15,29 @@ def get_all_http_serv():
     for ip_res in ip_scan_inf:
         for p, s in ip_res['scan'][ip_res['ip']]['tcp'].items():
             if s['name'] == 'http' or s['name'] == 'https':
-                http_serv.append({'proto': s['name'], 'ip': ip_res['ip'], 'port': p})
+                http_serv.append({
+                    'proto': s['name'], 
+                    'ip': ip_res['ip'], 
+                    'port': p})
 
     return http_serv
     # dict: {proto, ip, port}}
+    
+def get_http_serv(ip):
+    http_serv = []
+    # http_serv_dict = app.ip_clt.find({'scan.tcp.{}.name': 'http'}: {$exists: True})
+    ip_ent = app.ip_clt.find_one({'ip': ip})
+    if 'scan' not in ip_ent:
+        return http_serv
+    
+    for p, s in ip_ent['scan'][ip_ent['ip']]['tcp'].items():
+        if s['name'] == 'http' or s['name'] == 'https':
+            http_serv.append({
+                'proto': s['name'], 
+                'ip': ip_ent['ip'], 
+                'port': p})
+
+    return http_serv
 
 def save_res_to_db(http_serv):
     out_dir = 'screenshots/'
@@ -59,10 +78,22 @@ def screenshot(ip, port, protocol):
     os.system(cmd)
     return
 
-def tech_detect (url):
-    res = get(wapp_analyzer + url)
-    j_data = loads(res.text)
-    if (len(j_data['applications']) == 0):
-        return
+def detect_tech (ip):
+    http_serv = get_http_serv(ip)
+    urls = {}
+    ip_ent = app.ip_clt.find_one({'ip': ip})
+    for s in http_serv:
+        urls[s['port']] = s['proto'] + '://' + s['ip'] + ':' + s['port']
     
-    return j_data
+    for p, u in urls.items():
+        res = get(wapp_analyzer + u)
+        j_data = loads(res.text)
+        if (len(j_data['applications']) == 0):
+            continue
+        # update to db
+        ip_ent['scan'][ip]['tcp'][p]['apps'] = j_data['applications']
+        
+    print ('Update DB ..')
+    app.ip_clt.update_one({'ip': ip}, {'$set': ip_ent})
+            
+    return 

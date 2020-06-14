@@ -509,9 +509,9 @@ def google_hacking_dashboard():
 		'1': 'Directory listing vulnerabilities',
 		'2': 'Configuration files exposed',
 		'3': 'Database files exposed',
-		'4':'Log files exposed',
-		'5':'Backup and old files',
-		'6':'Login pages'
+		'4': 'Log files exposed',
+		'5': 'Backup and old files',
+		'6': 'Login pages'
 	}
 	queries_2 = {
 		'7':'SQL errors',
@@ -538,11 +538,15 @@ def edit_service(service_id):
 	return render_template('service_edit.html', service=service_entity)
 
 
+@app.route('/detect_tech/<string:ip>')
+def detect_tech(ip):
+    detect_tech_worker.delay(ip)
+    return redirect(request.referrer)
 
-
-
-
-
+@celery.task(name='app.detect_tech')
+def detect_tech_worker(ip):
+    http_utils.detect_tech(ip)
+    return
 
 
 
@@ -603,12 +607,12 @@ def custom_script_scan_worker(ip, scan_type_list):
 @app.route('/vuln_scan/<string:ip>')
 def vuln_scan(ip):
 	vuln_scan_woker.delay(ip)
-	return
+	return redirect(request.referrer)
 
 @celery.task(name='app.vuln_scan')
 def vuln_scan_woker(ip):
 	print ("Start vuln script scan on {}.".format(ip))
-	nmap_utils.vuln_script_scan(ip)
+	nmap_utils.vuln_scan(ip)
 	return
 
 @app.route('/brute_force_credentials/<string:domain>')
@@ -616,7 +620,6 @@ def brute_credentials(domain):
 	# brute force with brutespray
 
 	# get nmap result
-	
 	pass
 
 @celery.task(name='app.os_detect')
@@ -640,7 +643,7 @@ def screenshot():
 	res = http_utils.get_all_http_serv()
 	# screenshot
 	screenshot_worker.delay(res)
-	return 'Success'
+	return redirect(request.referrer)
 
 @app.route('/scan/openvas/<string:target>')
 def openvas_scan(target):
@@ -676,7 +679,8 @@ def burp_scan(url):
 @app.route('/test/', methods=['POST', 'GET'])
 @login_required
 def test():
-	return 'OK'
+	ip_ent = ip_clt.find_one({'ip': '52.77.36.99'})
+	return ip_ent['scan']['52.77.36.99']['tcp']['443']
 
 @app.route('/images/screenshots/<path:path>')
 def send_images(path):

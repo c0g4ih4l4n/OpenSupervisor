@@ -40,7 +40,54 @@ def get_port(ip):
 	return []
 
 def vuln_scan(ip):
-	category_script_scan(ip, ['vuln'])
+	# category_script_scan(ip, ['vuln'])
+	ip_entity = app.ip_clt.find_one({'ip': ip})
+	ports = get_port(ip)
+	ser_ports = {}
+
+	for p in ports:
+		s_name = ip_entity['scan'][ip]['tcp'][p]['name']
+		if s_name in ser_ports.keys():
+			ser_ports[s_name].append(p)
+		else:
+			ser_ports[s_name] = [p]
+	
+	vuln_script = {}
+	# get vuln script
+	for s in ser_ports.keys():
+		vuln_ents = app.vuln_clt.find({'service': s})
+		vuln_script[s] = []
+		for vuln in vuln_ents:
+			vuln_script[s].append(vuln['script'])
+
+	args = {}
+	for s in ser_ports.keys():
+		if len(vuln_script[s]) != 0:
+			args[s] = '-p{} --script {} -T4'.format(','.join(ser_ports[s]), ','.join(vuln_script[s]))
+		else:
+			args[s] = '-p{} --script vuln -T4'.format(','.join(ser_ports[s]))
+		print ("Scan service: {}".format(s))
+		nm.scan(ip, arguments=args[s], callback=vuln_scan_cb, sudo=False)
+	
+	return
+
+def vuln_scan_cb(host, scan_data):
+	ip_entity = app.ip_clt.find_one({'ip': host})
+	scan_data = convert_key_to_string(host, scan_data)
+	
+	data = scan_data['scan'][host]['tcp']
+	vuln_data = {}
+	for port, service in data.items():
+		print ("Port: {}, Service: {}".format(port, service))
+		if 'script' in service:
+			for s_res in service['script'].items():
+				if 'VULNERABLE' in s_res:
+					if port not in vuln_data:
+						vuln_data[port] = []
+					vuln_data[port].append(s_res['script_name'])
+
+	print ('Vulnerability: {}'.format(vuln_data))
+	app.ip_clt.update({'_id': ip_entity['_id']}, {'$set': {'vulners': vuln_data}})
 	return
 
 def default_script_scan(ip):
@@ -53,7 +100,6 @@ def default_script_scan(ip):
 	return
 
 def get_xml_result(ip):
-	
 	args = '-oX '
 
 	return
@@ -106,6 +152,13 @@ def update_status_scan(ip, scan_type_list=None):
 def update_db(host, scan_data, mode='script'):
 	ip_entity = app.ip_clt.find_one({'ip': host})
 	scan_data = convert_key_to_string(host, scan_data)
+
+	if 'scan' in ip_entity and host not in ip_entity['scan']:
+		if len(scan_data) != 0:
+			app.ip_clt.update({'_id': ip_entity['_id']}, 
+			{'$set': scan_data})
+		
+		return
 
 	old_port_data = ip_entity['scan'][host]['tcp']
 	new_port_data = scan_data['scan'][host]['tcp']

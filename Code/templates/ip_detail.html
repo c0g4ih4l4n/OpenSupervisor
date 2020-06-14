@@ -26,7 +26,7 @@
             <div class="col-12">
               <div class="callout callout-info">
                 <h5><i class="fas fa-info"></i> Note:</h5>
-                This page has been enhanced for printing. Click the print button at the bottom of the invoice to test.
+                You need to refresh page to get updated result after task done!
               </div>
   
   
@@ -43,7 +43,7 @@
                   <!-- /.col -->
                 </div>
 
-                {% if 'scan' in ip %}
+                {% if 'scan' in ip and ip['ip'] in ip['scan'] %}
                 <div class="row">
                     <h4><small>Hostname: {{ ip['scan'][ip['ip']]['hostnames'][0]['name'] }}</small></h4><br>
                     {% if 'scan' in ip and 'osmatch' in ip['scan'][ip['ip']] %}
@@ -120,6 +120,7 @@
                       </tr>
                       </thead>
                       <tbody>
+                      {% if 'whois' in ip %}
                       {% for n in ip['whois']['nets'] %}
                       <tr>
                         <td>{{ loop.index }}</td>
@@ -137,6 +138,7 @@
                         <td>{{ n['updated'] }}</td>
                       </tr>
                       {% endfor %}
+                      {% endif %}
                       </tbody>
                     </table>
                   </div>
@@ -198,10 +200,10 @@
                                 <th>Service</th>
                                 <th>Product Version</th>
                                 <th>Reason</th>
+                                <th>Vulners</th>
                                 <th>Edit</th>
                                 <th>Delete</th>
                                 <th>View</th>
-                                <th>Vuln Scan</th>
                                 <th>Script Result</th>
                                 <th>Technology</th>
                             </tr>
@@ -218,6 +220,11 @@
                                 <td>{{ service['name'] }}</td>
                                 <td>{{ service['product'] + ' ' + service['version'] }}</td>
                                 <td>{{ service['reason'] }}</td>
+                                {% if 'vulners' in ip %}
+                                <td>{{ ip['vulners'] }}</td>
+                                {% else %}
+                                <td>None</td>
+                                {% endif %}
                                 <td><a href="{{ url_for('test') }}">Edit</a></td>
                                 <td><form action="{{ url_for('test') }}" method="POST">
                                     <input type="hidden" name="_method" value="DELETE">
@@ -226,7 +233,6 @@
                                 <!-- <td><a href="{{ url_for('test') }}">Scan</a></td> -->
                     
                                 <td><a href="{{ url_for('test') }}">View</a></td>
-                                <td><a href="{{ url_for('test') }}">Vuln Scan</a></td>
                                 <td>
                                     <!-- {{ service['script'] }} -->
                                     {% if 'script' in service %}
@@ -235,11 +241,11 @@
                                         <p><strong>{{ n }}</strong>: {{ s }}</p>
 
                                     </div>
-                                        
+                                  
                                     {% endfor %}
                                     {% endif %}
                                 </td>
-                                <td>{{ service['technology'] }}</td>
+                                <td>{{ service['apps'] }}</td>
                             </tr>
                             {% endfor %}
                             {% endif %}
@@ -251,7 +257,10 @@
 
                 <a href="{{ url_for('script_scan', ip=ip['ip']) }}">Default Script Scan</a>
                 <br>
-                <a href="{{ url_for('create_ip') }}">Create new one</a>
+                <a href="{{ url_for('vuln_scan', ip=ip['ip']) }}">Vulnerability Script Scan</a>
+                <br>
+                <a href="{{ url_for('detect_tech', ip=ip['ip']) }}">Get Tech of HTTP Service</a>
+                <br>
         </div><!-- /.container-fluid -->
       </section>
 
