@@ -228,11 +228,11 @@
                                 <td><a href="{{ url_for('test') }}">Edit</a></td>
                                 <td><form action="{{ url_for('test') }}" method="POST">
                                     <input type="hidden" name="_method" value="DELETE">
-                                    <input type="submit" value="Delete">
+                                    <input class="btn btn-block btn-danger btn-xs" type="submit" value="Delete">
                                 </form></td>
                                 <!-- <td><a href="{{ url_for('test') }}">Scan</a></td> -->
                     
-                                <td><a href="{{ url_for('test') }}">View</a></td>
+                                <td><a class="btn btn-block btn-info btn-xs" href="{{ url_for('test') }}">View</a></td>
                                 <td>
                                     <!-- {{ service['script'] }} -->
                                     {% if 'script' in service %}
@@ -262,12 +262,11 @@
                 <a href="{{ url_for('detect_tech', ip=ip['ip']) }}">Get Tech of HTTP Service</a>
                 <br>
         </div><!-- /.container-fluid -->
-      </section>
 
+        <div class='row'>
 
-
-    <div>
         Scan scripts:
+        <br>
         <table border="1px">
             <tr>
                 <th>ID</th>
@@ -294,7 +293,11 @@
         </table>
                 <input type="submit" value="Scan">
             </form>
-    </div>
+        </div>
+      </section>
+
+
+
 
 </div>
 

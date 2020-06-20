@@ -122,7 +122,7 @@ class DomainListAPI(Resource):
 		headers = {'Content-Type': 'text/html'}
 		domains = dm_clt.find()
 		domains_json = db_utils.cursor_to_json(domains)
-		return make_response(render_template('domain_dashboard.html', domains=domains_json, title='Domain Dashboard'), 200, headers)
+		return make_response(render_template('domain_dashboard.html', domains=domains_json, title='Domain Dashboard', active='domain'), 200, headers)
 
 	def post(self):
 		domain_name = request.form['domain_name']
@@ -153,7 +153,7 @@ class SubDomainAPI(Resource):
 	def get(self, domain_name):
 		headers = {}
 		domain_entity = dm_clt.find_one({'domain_name': domain_name})
-		return make_response(render_template('subdomain_dashboard.html', domain=domain_entity), 200, headers)
+		return make_response(render_template('subdomain_dashboard.html', domain=domain_entity, active='domain'), 200, headers)
 
 	def post(self, domain_name):
 		if request.form['_method'] == 'PUT':
@@ -182,7 +182,7 @@ class IPListAPI(Resource):
 		headers = {'Content-Type': 'text/html'}
 		ips = ip_clt.find()
 		ips_json = ip_utils.cursor_to_json(ips)
-		return make_response(render_template('ip_dashboard.html', ips=ips_json, title='IP Dashboard'), 200, headers)
+		return make_response(render_template('ip_dashboard.html', ips=ips_json, title='IP Dashboard', active='ip'), 200, headers)
 
 	def post(self):
 		domain_name = request.form['domain_name']
@@ -213,7 +213,7 @@ class IPAPI(Resource):
 		headers = {}
 		ip_entity = ip_clt.find_one({'ip': ip})
 		scan_type_list = ['auth', 'broadcast', 'brute', 'default', 'discovery', 'dos', 'exploit', 'external', 'fuzzer', 'intrusive', 'malware', 'safe', 'version', 'vuln']
-		return make_response(render_template('ip_detail.html', ip=ip_entity, scan_type_list=scan_type_list, title='IP Detail'), 200, headers)
+		return make_response(render_template('ip_detail.html', ip=ip_entity, scan_type_list=scan_type_list, title='IP Detail', active='ip'), 200, headers)
 
 	def post(self, domain_name):
 		if request.form['_method'] == 'PUT':
@@ -240,7 +240,7 @@ class VulnListAPI(Resource):
 		headers = {'Content-Type': 'text/html'}
 		vulns = vuln_clt.find({})
 		vulns_json = vuln_utils.cursor_to_json(vulns)
-		return make_response(render_template('vuln_dashboard.html', vulns=vulns_json, title='Vulnerability Dashboard'), 200, headers)
+		return make_response(render_template('vuln_dashboard.html', vulns=vulns_json, title='Vulnerability Dashboard', active='vuln'), 200, headers)
 
 	def post(self):
 		service = request.form['service']
@@ -293,7 +293,7 @@ class ServiceListAPI(Resource):
 		headers = {'Content-Type': 'text/html'}
 		services = service_clt.find({})
 		services_json = vuln_utils.cursor_to_json(services)
-		return make_response(render_template('service_dashboard.html', services=services_json, title='Service Dashboard'), 200, headers)
+		return make_response(render_template('service_dashboard.html', services=services_json, title='Service Dashboard', active='service'), 200, headers)
 
 	def post(self):
 		# return request.form.getlist('protocol')
@@ -368,7 +368,11 @@ def set_subdomain_scan_schedule(domain):
 @app.route('/')
 @login_required
 def home():
-	return render_template('home_page.html', title="Dragon Scanner", page_title='Home Page')
+    num_domains = dm_clt.count()
+    num_ips = ip_clt.count()
+    num_vuln = vuln_clt.count()
+    num_serv = service_clt.count()
+    return render_template('home_page.html', title="Dragon Scanner", page_title='Home Page', num_domains=num_domains, num_ips=num_ips, num_vuln=num_vuln, num_serv=num_serv, active='main_dashboard')
 
 @app.route('/static/<path:filename>')
 def static_file():
@@ -522,7 +526,7 @@ def google_hacking_dashboard():
 		'12':'Search Github.com and Gitlab.com',
 		'13':'Search Stackoverflow.com'
 	}
-	return render_template('google_hacking_dashboard.html', queries=queries, queries_2=queries_2, title='Google Hacking Queries')
+	return render_template('google_hacking_dashboard.html', queries=queries, queries_2=queries_2, title='Google Hacking Queries', active='google_dork')
 
 
 
@@ -657,7 +661,6 @@ def openvas_scan(target):
 
 @app.route('/burp_scan_dashboard')
 def burp_scan_dashboard(target):
-	
 	return render_template('burp_dashboard.html')
 
 @app.route('/scan/burp/<string:url>')

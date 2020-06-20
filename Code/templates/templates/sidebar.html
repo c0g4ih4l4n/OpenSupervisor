@@ -23,16 +23,16 @@
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
-          <li class="nav-item has-treeview menu-open">
-            <a href="{{ url_for('home') }}" class="nav-link active">
+          <li class="nav-item has-treeview">
+            <a href="{{ url_for('home') }}" class="nav-link {% if active == 'main_dashboard' %} active {% endif %}">
               <i class="nav-icon fas fa-tachometer-alt"></i>
               <p>
                 Dashboard
               </p>
             </a>
           </li>
-          <li class="nav-item has-treeview menu-open">
-            <a href="{{ url_for('domain_dashboard') }}" class="nav-link">
+          <li class="nav-item has-treeview">
+            <a href="{{ url_for('domain_dashboard') }}" class="nav-link {% if active == 'domain' %} active {% endif %}">
               <i class="nav-icon fas fa-th"></i>
               <p>
                 Domain Dashboard
@@ -40,7 +40,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="{{ url_for('api.ips') }}" class="nav-link">
+            <a href="{{ url_for('api.ips') }}" class="nav-link {% if active == 'ip' %} active {% endif %}">
               <i class="nav-icon fas fa-th"></i>
               <p>
                 IPs
@@ -49,7 +49,7 @@
             </a>
           </li>
           <li class="nav-item has-treeview">
-            <a href="{{ url_for('google_hacking_dashboard') }}" class="nav-link">
+            <a href="{{ url_for('google_hacking_dashboard') }}" class="nav-link {% if active == 'google_dork' %} active {% endif %}">
               <i class="nav-icon fas fa-copy"></i>
               <p>
                 Google Hacking Queries
@@ -62,7 +62,7 @@
 
 <!-- vuln -->
           <li class="nav-item has-treeview">
-            <a href="{{ url_for('api.vulns') }}" class="nav-link">
+            <a href="{{ url_for('api.vulns') }}" class="nav-link {% if active == 'vuln' %} active {% endif %}">
               <i class="nav-icon fas fa-chart-pie"></i>
               <p>
                 Vulnerability Database
@@ -74,7 +74,7 @@
 
           <!-- service -->
           <li class="nav-item has-treeview">
-            <a href="{{ url_for('api.services') }}" class="nav-link">
+            <a href="{{ url_for('api.services') }}" class="nav-link {% if active == 'service' %} active {% endif %}">
               <i class="nav-icon fas fa-tree"></i>
               <p>
                 Service Database
