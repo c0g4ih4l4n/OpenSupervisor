@@ -245,7 +245,14 @@
                                     {% endfor %}
                                     {% endif %}
                                 </td>
-                                <td>{{ service['apps'] }}</td>
+                                <td>
+                                  {% for t in service['apps'] %}
+                                  <div class="callout callout-info">
+                                  {{ t['name'] }} {% if t['version'] != None %} v{{ t['version'] }} {% endif %}
+                                  </div>
+                                  <br>
+                                  {% endfor %}
+                                </td>
                             </tr>
                             {% endfor %}
                             {% endif %}
