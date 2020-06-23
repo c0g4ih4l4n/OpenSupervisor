@@ -61,3 +61,6 @@ Change scan port method
 
 wappanalyer api key 
 6rWzxmwbEfdckIBcRck9f2g4SRon0Ha5GbmXT500
+
+amass, subfinder, webscreenshot, findomain
+subjack massdns
